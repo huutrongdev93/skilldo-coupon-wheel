@@ -1,0 +1,697 @@
+:root {
+    --couponWheel-fontSize: 14px;
+    --couponWheel-txtColor: #fff;
+    --couponWheel-btnBgColor: #fff;
+    --couponWheel-btnTxtColor: var(--theme-color);
+
+    --couponWheel-trigger-color: #ffe2e2;
+    --couponWheel-trigger-effect: onilgapp-animate-wobble;
+}
+.couponWheel_hidden {
+    display: none;
+}
+.couponWheel_ios_stop_scrolling {
+    height: 100vh;
+    width: 100%;
+    position: fixed;
+    overflow: hidden;
+}
+.couponWheel_popup_shadow {
+    background-color: rgba(0,0,0,.5);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100000;
+    display: none;
+}
+.couponWheel_popup {
+    all: initial;
+    font-family: inherit;
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    max-width: 60em;
+    z-index: 100001;
+    box-shadow: .5em 0 2em rgba(0,0,0,.5);
+    color: white;
+    overflow-y: auto;
+    display: none;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    font-size: var(--couponWheel-fontSize);
+    .couponWheel_popup_wheel_container {
+        user-select: none;
+        padding: 1em 0;
+    }
+}
+.couponWheel_form {
+    font-size: 1em;
+    line-height: 1.1em;
+    padding: 1.5em;
+    margin: 0;
+    .couponWheel_popup_close_container {
+        text-align: right;
+        position: absolute; top:20px; right: 20px;
+        .couponWheel_popup_close_btn {
+            font-size: 2.2em;
+            display: inline-block;
+            cursor: pointer;
+        }
+    }
+    .couponWheel_popup_header_image {
+        margin: 1.2em 0;
+        display: block;
+        width: auto;
+        height: auto;
+        min-height: 3em;
+        max-width: 100%;
+        max-height: 5em;
+        box-sizing: border-box;
+    }
+    .couponWheel_popup_heading_text {
+        font-weight: bold;
+        text-shadow: .05em .05em .06em rgba(0,0,0,.66);
+        font-size: 25px;
+        margin-top: .5em;
+        margin-bottom: 1em;
+        line-height: 30px;
+        text-transform: uppercase;
+    }
+    .couponWheel_popup_main_text {
+        margin: 1em 0;
+        line-height:25px;
+    }
+    .couponWheel_popup_form_error_text {
+        font-weight: 600;
+        margin: 1.5em 0;
+    }
+    .couponWheel_popup_rules_text {
+        margin: 1em 0;
+        font-size: .85em;
+        line-height: 30px;
+        white-space: pre-wrap;
+    }
+    .couponWheel_coupon_code {
+        font-size: 1.5em;
+        display: block;
+        margin-bottom: 15px;
+        border-radius: 3px;
+        background: #fff;
+        padding: 15px;
+        border: 0;
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        color: #000!important;
+        font-weight: bold;
+        text-align: center;
+    }
+    .form-group label {
+        font-weight: bold;
+        color:var(--couponWheel-txtColor);
+    }
+    input[type=email], input[type=text] {
+        -webkit-appearance: none;
+        font-weight: 400;
+        align-items: center;
+        appearance: none;
+        background-color: #fff;
+        border: 2px solid transparent;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        color: #4c4c4c;
+        display: flex;
+        font-family: inherit;
+        font-size: 1em;
+        height: 42px;
+        justify-content: flex-start;
+        margin: 0;
+        outline: 0;
+        padding: 7px 15px;
+        width: 100%;
+    }
+    button {
+        align-items: center;
+        -webkit-appearance: button;
+        appearance: button;
+        background-color: var(--couponWheel-btnBgColor);
+        background-image: none;
+        border: none;
+        border-radius: 4px;
+        color: var(--couponWheel-btnTxtColor);
+        cursor: pointer;
+        display: flex;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        height: 42px;
+        justify-content: center;
+        line-height: inherit;
+        margin: 0;
+        min-width: 160px;
+        outline: 0;
+        padding: 12px 25px;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        text-transform: none;
+        width: 100%;
+
+        -webkit-animation: onilgapp-pulse 1.8s infinite;
+        animation: onilgapp-pulse 1.8s infinite;
+        box-shadow: 0 0 0 0 transparent;
+    }
+    .couponWheel_spin_again_btn {
+        display: block;
+        margin-top: 1.5em;
+        padding: .5em 0;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: underline;
+    }
+}
+.couponWheel_popup_wheel_container {
+    position: relative;
+    left: -70px;
+    width: 124%;
+    .couponWheel_wheel_crop {
+        overflow: hidden;
+        position: relative;
+        display: inline-table;
+        padding: 2px;
+        width: 86%;
+        .couponWheel_wheel {
+            position: relative;
+            color: black;
+            font-weight: bold;
+            font-size: 0.8em;
+            transform-origin: 50% 50%;
+            -webkit-transform-origin: 50% 50%;
+            line-height: 0;
+            .couponWheel_wheel_img {
+                all: initial;
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+            .couponWheel_wheel_img_center {
+                position: absolute;
+                top:33%;
+                left:33%;
+                width:34%;
+            }
+            .couponWheel_slice_label {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 43%;
+                text-align: right;
+                font-size: .85em;
+                line-height: 1.2em;
+                transform-origin: 0 50%;
+                -webkit-transform-origin: 0% 50%;
+                color: rgb(40,40,40);
+                &:nth-of-type(even) {
+                    color: white;
+                }
+                &:nth-of-type(1) {
+                    transform: translateY(-50%) rotate(0deg);
+                    -webkit-transform: translateY(-50%) rotate(0deg);
+                }
+                &:nth-of-type(2) {
+                    transform: translateY(-50%) rotate(30deg);
+                    -webkit-transform: translateY(-50%) rotate(30deg);
+                }
+                &:nth-of-type(3) {
+                    transform: translateY(-50%) rotate(60deg);
+                    -webkit-transform: translateY(-50%) rotate(60deg);
+                }
+                &:nth-of-type(4) {
+                    transform: translateY(-50%) rotate(90deg);
+                    -webkit-transform: translateY(-50%) rotate(90deg);
+                }
+                &:nth-of-type(5) {
+                    transform: translateY(-50%) rotate(120deg);
+                    -webkit-transform: translateY(-50%) rotate(120deg);
+                }
+                &:nth-of-type(6) {
+                    transform: translateY(-50%) rotate(150deg);
+                    -webkit-transform: translateY(-50%) rotate(150deg);
+                }
+                &:nth-of-type(7) {
+                    transform: translateY(-50%) rotate(180deg);
+                    -webkit-transform: translateY(-50%) rotate(180deg);
+                }
+                &:nth-of-type(8) {
+                    transform: translateY(-50%) rotate(210deg);
+                    -webkit-transform: translateY(-50%) rotate(210deg);
+                }
+                &:nth-of-type(9) {
+                    transform: translateY(-50%) rotate(240deg);
+                    -webkit-transform: translateY(-50%) rotate(240deg);
+                }
+                &:nth-of-type(10) {
+                    transform: translateY(-50%) rotate(270deg);
+                    -webkit-transform: translateY(-50%) rotate(270deg);
+                }
+                &:nth-of-type(11) {
+                    transform: translateY(-50%) rotate(300deg);
+                    -webkit-transform: translateY(-50%) rotate(300deg);
+                }
+                &:nth-of-type(12) {
+                    transform: translateY(-50%) rotate(330deg);
+                    -webkit-transform: translateY(-50%) rotate(330deg);
+                }
+            }
+            .style2, .style3, .style4, .style5, .style6, .style7 {
+                .couponWheel_slice_label {
+                    &:nth-of-type(even) {
+                        color: inherit;
+                    }
+                    &:nth-of-type(4), &:nth-of-type(8), &:nth-of-type(12) {
+                        color: white;
+                    }
+                }
+            }
+            .style8 {
+                .couponWheel_slice_label {
+                    color: #222;
+                }
+            }
+            .style9 {
+                .couponWheel_slice_label {
+                    color: #222;
+                    &:nth-of-type(4n) {
+                        color: white;
+                    }
+                }
+            }
+            .style10 {
+                .couponWheel_slice_label {
+                    color: white;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,.8);
+                }
+            }
+        }
+    }
+    .couponWheel_marker {
+        position: absolute;
+        width: 19.4%;
+        right: 0%;
+        top: 50%;
+        transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+        z-index: 2000;
+    }
+}
+.couponWheel_ajax_loader {
+    margin-top: 1em;
+    display: none;
+    > div {
+        width: .5em;
+        height: .5em;
+        margin-right: .33em;
+        border-radius: 100%;
+        display: inline-block;
+        -webkit-animation: couponWheel_sk-bouncedelay 1.4s infinite ease-in-out both;
+        animation: couponWheel_sk-bouncedelay 1.4s infinite ease-in-out both;
+        background-color:var(--couponWheel-txtColor);
+    }
+    div {
+        &:nth-child(1) {
+            -webkit-animation-delay: -0.32s;
+            animation-delay: -0.32s;
+        }
+        &:nth-child(2) {
+            -webkit-animation-delay: -0.16s;
+            animation-delay: -0.16s;
+        }
+    }
+}
+.couponWheel_trigger {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 99999;
+    .couponWheel_trigger_box {
+        padding:20px;
+        border-radius: 50%;
+        overflow: hidden;
+        height: 100px;
+        width: 100px;
+        display: flex;
+        align-items: center;
+        -webkit-animation: var(--couponWheel-trigger-effect) 3s infinite;
+        animation: var(--couponWheel-trigger-effect) 3s infinite;
+        background-color: var(--couponWheel-trigger-color);
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    img {
+        width: 4em;
+    }
+}
+
+@media screen and (min-width: 650px) {
+    .couponWheel_wheel {
+        font-size: 1em;
+        .couponWheel_slice_label {
+            font-size: 0.8em;
+        }
+    }
+    .couponWheel_popup {
+        overflow: visible;
+        .couponWheel_popup_wheel_container {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-width: 50%;
+            overflow: hidden;
+            .couponWheel_wheel_container {
+                top: 50%;
+                transform: translateY(-50%);
+                -webkit-transform: translateY(-50%);
+                position: absolute;
+                left: -42%;
+                width: 144%;
+            }
+        }
+    }
+    .couponWheel_popup_form_container {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        max-width: 50%;
+        overflow-y: auto;
+        .couponWheel_form {
+            font-size: 1.08em;
+            padding: 0;
+            margin: 6em 3em 3em 1.5em;
+            .couponWheel_popup_heading_text {
+                margin-top: 3em;
+            }
+        }
+    }
+    .couponWheel_popup_background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+}
+
+@-webkit-keyframes couponWheel_sk-bouncedelay {
+    0%, 80%, 100% { -webkit-transform: scale(0) }
+    40% { -webkit-transform: scale(1.0) }
+}
+@keyframes couponWheel_sk-bouncedelay {
+    0%, 80%, 100% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    } 40% {
+          -webkit-transform: scale(1.0);
+          transform: scale(1.0);
+      }
+}
+@-webkit-keyframes onilgapp-pulse {
+    0% {
+        box-shadow: 0 0 0 0 hsla(0,0%,100%,.7)
+    }
+
+    55% {
+        box-shadow: 0 0 0 8px transparent
+    }
+
+    to {
+        box-shadow: 0 0 0 0 transparent
+    }
+}
+@keyframes onilgapp-pulse {
+    0% {
+        box-shadow: 0 0 0 0 hsla(0,0%,100%,.7)
+    }
+
+    55% {
+        box-shadow: 0 0 0 8px transparent
+    }
+
+    to {
+        box-shadow: 0 0 0 0 transparent
+    }
+}
+
+@-webkit-keyframes onilgapp-animate-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+
+    to {
+        -webkit-transform: rotate(1turn);
+        transform: rotate(1turn)
+    }
+}
+@keyframes onilgapp-animate-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+
+    to {
+        -webkit-transform: rotate(1turn);
+        transform: rotate(1turn)
+    }
+}
+
+@-webkit-keyframes trigger-animate-zoomin {
+    0% {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
+
+    50% {
+        -webkit-transform: scale(1.05);
+        transform: scale(1.05)
+    }
+
+    to {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
+}
+@keyframes trigger-animate-zoomin {
+    0% {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
+
+    50% {
+        -webkit-transform: scale(1.05);
+        transform: scale(1.05)
+    }
+
+    to {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
+}
+
+@-webkit-keyframes trigger-animate-swing {
+    20% {
+        -webkit-transform: rotate(15deg);
+        transform: rotate(15deg)
+    }
+
+    40% {
+        -webkit-transform: rotate(-10deg);
+        transform: rotate(-10deg)
+    }
+
+    60% {
+        -webkit-transform: rotate(5deg);
+        transform: rotate(5deg)
+    }
+
+    80% {
+        -webkit-transform: rotate(-5deg);
+        transform: rotate(-5deg)
+    }
+
+    to {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+}
+@keyframes trigger-animate-swing {
+    20% {
+        -webkit-transform: rotate(15deg);
+        transform: rotate(15deg)
+    }
+
+    40% {
+        -webkit-transform: rotate(-10deg);
+        transform: rotate(-10deg)
+    }
+
+    60% {
+        -webkit-transform: rotate(5deg);
+        transform: rotate(5deg)
+    }
+
+    80% {
+        -webkit-transform: rotate(-5deg);
+        transform: rotate(-5deg)
+    }
+
+    to {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+}
+
+@-webkit-keyframes trigger-animate-wobble {
+    0% {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+    }
+
+    15% {
+        -webkit-transform: translate3d(-10%,0,0) rotate(-5deg);
+        transform: translate3d(-10%,0,0) rotate(-5deg)
+    }
+
+    30% {
+        -webkit-transform: translate3d(10%,0,0) rotate(3deg);
+        transform: translate3d(10%,0,0) rotate(3deg)
+    }
+
+    45% {
+        -webkit-transform: translate3d(-5%,0,0) rotate(-3deg);
+        transform: translate3d(-5%,0,0) rotate(-3deg)
+    }
+
+    60% {
+        -webkit-transform: translate3d(5%,0,0) rotate(2deg);
+        transform: translate3d(5%,0,0) rotate(2deg)
+    }
+
+    75% {
+        -webkit-transform: translateZ(0) rotate(-1deg);
+        transform: translateZ(0) rotate(-1deg)
+    }
+
+    to {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+    }
+}
+@keyframes trigger-animate-wobble {
+    0% {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+    }
+
+    15% {
+        -webkit-transform: translate3d(-10%,0,0) rotate(-5deg);
+        transform: translate3d(-10%,0,0) rotate(-5deg)
+    }
+
+    30% {
+        -webkit-transform: translate3d(10%,0,0) rotate(3deg);
+        transform: translate3d(10%,0,0) rotate(3deg)
+    }
+
+    45% {
+        -webkit-transform: translate3d(-5%,0,0) rotate(-3deg);
+        transform: translate3d(-5%,0,0) rotate(-3deg)
+    }
+
+    60% {
+        -webkit-transform: translate3d(5%,0,0) rotate(2deg);
+        transform: translate3d(5%,0,0) rotate(2deg)
+    }
+
+    75% {
+        -webkit-transform: translateZ(0) rotate(-1deg);
+        transform: translateZ(0) rotate(-1deg)
+    }
+
+    to {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+    }
+}
+
+@-webkit-keyframes trigger-animate-bounce {
+    0%,20%,53%,to {
+        -webkit-animation-timing-function: cubic-bezier(.215,.61,.355,1);
+        animation-timing-function: cubic-bezier(.215,.61,.355,1);
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+    }
+
+    40%,43% {
+        -webkit-animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        -webkit-transform: translate3d(0,-10px,0) scaleY(1.05);
+        transform: translate3d(0,-10px,0) scaleY(1.05)
+    }
+
+    70% {
+        -webkit-animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        -webkit-transform: translate3d(0,-5px,0) scaleY(1.03);
+        transform: translate3d(0,-5px,0) scaleY(1.03)
+    }
+
+    80% {
+        -webkit-transform: translateZ(0) scaleY(1.03);
+        transform: translateZ(0) scaleY(1.03);
+        transition-timing-function: cubic-bezier(.215,.61,.355,1)
+    }
+
+    90% {
+        -webkit-transform: translateZ(0) scaleY(1);
+        transform: translateZ(0) scaleY(1)
+    }
+}
+@keyframes trigger-animate-bounce {
+    0%,20%,53%,to {
+        -webkit-animation-timing-function: cubic-bezier(.215,.61,.355,1);
+        animation-timing-function: cubic-bezier(.215,.61,.355,1);
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+    }
+
+    40%,43% {
+        -webkit-animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        -webkit-transform: translate3d(0,-10px,0) scaleY(1.05);
+        transform: translate3d(0,-10px,0) scaleY(1.05)
+    }
+
+    70% {
+        -webkit-animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        animation-timing-function: cubic-bezier(.755,.05,.855,.06);
+        -webkit-transform: translate3d(0,-5px,0) scaleY(1.03);
+        transform: translate3d(0,-5px,0) scaleY(1.03)
+    }
+
+    80% {
+        -webkit-transform: translateZ(0) scaleY(1.03);
+        transform: translateZ(0) scaleY(1.03);
+        transition-timing-function: cubic-bezier(.215,.61,.355,1)
+    }
+
+    90% {
+        -webkit-transform: translateZ(0) scaleY(1);
+        transform: translateZ(0) scaleY(1)
+    }
+}

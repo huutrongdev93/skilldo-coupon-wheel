@@ -1,0 +1,68 @@
+.coupon-wheel-form {
+    .display-items-img {
+        .item-img {
+            border-radius: 8px;
+            overflow: hidden;
+            border:2px solid transparent;
+            padding:2px;
+            span {
+                border-radius: 8px;
+                display: block;
+                padding:20px;
+                cursor: pointer;
+                background-size: cover!important;
+            }
+            input {
+                display: none;
+            }
+            &.active {
+                border-color:#000;
+            }
+        }
+    }
+}
+table.table-wheel-log {
+    background-color: var(--content-bg);
+    color:rgba(107,114,128, 1);
+    tr.un_read {
+        border-radius: 10px;
+        td {
+            background-color: #eeffee !important;
+        }
+    }
+    tr {
+        td {
+            box-shadow: none;
+        }
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    height: 24px;
+    &-red {
+        background-color: #fef1f1;
+        color: #dc2828;
+        border-color: #dc2828;
+    }
+    &-green {
+        background-color: #f2fdf5;
+        color: #16a249;
+        border-color: #16a249;
+    }
+    &-yellow {
+        background-color: #fefce7;
+        color: #c88a04;
+        border-color: #c88a04;
+    }
+}
