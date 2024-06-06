@@ -108,7 +108,7 @@ class CouponWheelHandle {
 		$.post(ajax, data, function () {}, 'json').done(function (response) {
 			show_message(response.message, response.status)
 		    if (response.status === 'success') {
-				location.href = 'admin/plugins?page=couponWheel';
+				location.href = 'admin/plugins/coupon-wheel';
 		    }
 		});
 

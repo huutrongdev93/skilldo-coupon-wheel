@@ -30,33 +30,4 @@ table.table-wheel-log tr.un_read td {
 table.table-wheel-log tr td {
   box-shadow: none;
 }
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 18px;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  height: 24px;
-}
-.badge-red {
-  background-color: #fef1f1;
-  color: #dc2828;
-  border-color: #dc2828;
-}
-.badge-green {
-  background-color: #f2fdf5;
-  color: #16a249;
-  border-color: #16a249;
-}
-.badge-yellow {
-  background-color: #fefce7;
-  color: #c88a04;
-  border-color: #c88a04;
-}
 /*# sourceMappingURL=style.admin.css.map */

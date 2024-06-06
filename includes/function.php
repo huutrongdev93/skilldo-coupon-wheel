@@ -1,266 +1,85 @@
 <?php
-class Wheel extends Model {
+class Wheel extends SkillDo\Model\Model {
 
     static string $table = 'wheels';
 
-    static function insert($insertData = [], $object = []) {
-        $columnsTable = [
-            'name'                  => ['string'],
-            'seen_key'              => ['string'],
-            'is_live'               => ['int', 0],
-            'max_spins_per_user'    => ['int', 1],
-            'reset_counter_days'    => ['int', 0],
-            'show_popup_after'      => ['int', 20],
-            'wheel_spin_time'       => ['int', 10],
+    static array $columns = [
+        'name'                  => ['string'],
+        'seen_key'              => ['string'],
+        'is_live'               => ['int', 0],
+        'max_spins_per_user'    => ['int', 1],
+        'reset_counter_days'    => ['int', 0],
+        'show_popup_after'      => ['int', 20],
+        'wheel_spin_time'       => ['int', 10],
+        'require_user'          => ['int', 0],
+        'require_email'         => ['int', 0],
+        'require_fullname'      => ['int', 1],
+        'require_phone'         => ['int', 1],
+        'kiosk_mode'            => ['int', 0],
+        'timed_trigger'         => ['int', 1],
+        'exit_trigger'          => ['int', 1],
+        'prevent_triggers_on_mobile'    => ['int', 0],
+        'coupon_urgency_timer'  => ['int', 30],
+        'popup_impressions'     => ['int', 0],
+        'popup_spin'            => ['int', 0],
+        'status'                => ['string', 'run'],
+    ];
 
-            'require_user'          => ['int', 0],
-            'require_email'         => ['int', 0],
-            'require_fullname'      => ['int', 1],
-            'require_phone'         => ['int', 1],
+    static array $rules = [
+        'created'   => true,
+        'updated'   => true,
+    ];
 
-            'kiosk_mode'            => ['int', 0],
-
-            'timed_trigger'         => ['int', 1],
-            'exit_trigger'          => ['int', 1],
-            'prevent_triggers_on_mobile'    => ['int', 0],
-            'coupon_urgency_timer'  => ['int', 30],
-            'popup_impressions'     => ['int', 0],
-            'popup_spin'            => ['int', 0],
-            'status'                => ['string', 'run'],
-        ];
+    static function insert($insertData = [], object|null $oldObject = null): int|SKD_Error
+    {
         foreach (range(1,12) as $i) {
-            $columnsTable['slice'.$i.'_label'] = ['string'];
-            $columnsTable['slice'.$i.'_value'] = ['string'];
-            $columnsTable['slice'.$i.'_qty'] = ['int', 0];
-            $columnsTable['slice'.$i.'_infinite'] = ['int', 0];
-            $columnsTable['slice'.$i.'_percent'] = ['int', 12];
+            static::$columns['slice'.$i.'_label'] = ['string'];
+            static::$columns['slice'.$i.'_value'] = ['string'];
+            static::$columns['slice'.$i.'_qty'] = ['int', 0];
+            static::$columns['slice'.$i.'_infinite'] = ['int', 0];
+            static::$columns['slice'.$i.'_percent'] = ['int', 12];
         }
 
-        $columnsTable = apply_filters('columns_db_'.self::$table, $columnsTable);
-
-        $update = false;
-
-        if (!empty($insertData['id'])) {
-            $id        = (int) $insertData['id'];
-            $update    = true;
-            $oldObject = (have_posts($object)) ? $object : static::get($id);
-            if (!$oldObject) return new SKD_Error('invalid_discounts_id', __('ID chương trình không chính xác.'));
-        }
-
-        if(!$update) {
-            if(empty($insertData['name'])) return new SKD_Error('empty_coupon_wheel_name', __('Không thể cập nhật khi tiêu đề trống.'));
-            if(empty($insertData['seen_key'])) $insertData['seen_key'] = substr(md5(uniqid('',true)).'seen_key',0,6);
-        }
-
-
-        $insertData = createdDataInsert($columnsTable, $insertData, (isset($oldObject)) ? $oldObject : null);
-
-        foreach ($columnsTable as $columnsKey => $columnsValue) {
-            ${$columnsKey}  = $insertData[$columnsKey];
-        }
-
-        $data = apply_filters('pre_insert_'.self::$table.'_data', compact(array_keys($columnsTable)), $insertData, $update ? $oldObject : null);
-
-        $model = model(self::$table);
-
-        if ($update) {
-            if(!empty($insertData['created'])) {
-                $data['created'] = $insertData['created'];
+        if (empty($insertData['id'])) {
+            if(empty($insertData['seen_key'])) {
+                $insertData['seen_key'] = substr(md5(uniqid('',true)).'seen_key',0,6);
             }
-            if(!empty($insertData['updated'])) {
-                $data['updated'] = $insertData['updated'];
-            }
-            else {
-                $data['updated'] = gmdate('Y-m-d H:i:s', time() + 7*3600);
-            }
-            $model->update($data, Qr::set($id));
-            $id = (int) $id;
-
-        } else {
-            if(!empty($insertData['created'])) {
-                $data['created'] = $insertData['created'];
-            }
-            else {
-                $data['created'] = gmdate('Y-m-d H:i:s', time() + 7*3600);
-            }
-            $id = $model->add($data);
         }
 
-        return $id;
-    }
-    static function update($update, $args) {
-        if(!have_posts($update)) return new SKD_Error('invalid_update', __('Không có trường dữ liệu nào được cập nhật.'));
-        if(!have_posts($args)) return new SKD_Error('invalid_update', __('Không có điều kiện cập nhật.'));
-        $update['updated'] = gmdate('Y-m-d H:i:s', time() + 7*3600);
-        return apply_filters('update_'.static::$table, model(static::$table)->update($update, $args), $update, $args);
-    }
-    static function delete($objectId = 0): array|bool
-    {
-        $objectId = (int)Str::clear($objectId);
-
-        if($objectId == 0) return false;
-
-        if(model(self::$table)->delete(Qr::set($objectId))) {
-            Metadata::deleteByMid(self::$table, $objectId);
-            do_action('delete_'.self::$table.'_success', $objectId );
-            return [$objectId];
-        }
-
-        return false;
-    }
-
-    static public function getMeta($objectId, $key = '', $single = true) {
-        return Metadata::get(self::$table, $objectId, $key, $single);
-    }
-
-    static public function updateMeta($objectId, $meta_key, $meta_value) {
-        return Metadata::update(self::$table, $objectId, $meta_key, $meta_value);
-    }
-
-    static public function deleteMeta($objectId, $meta_key = '', $meta_value = ''): bool
-    {
-        return Metadata::delete(self::$table, $objectId, $meta_key, $meta_value);
-    }
-
-    static function displayDefault(): array
-    {
-        $displayText = [
-            'vn' => [
-                'popup_heading_text'        => 'ƯU ĐÃI DÀNH CHO BẠN',
-                'popup_main_text'           => 'Đừng bỏ qua cơ hội nhận được nhiều ưu đãi hấp dẫn từ vòng xoay may mắn. Bạn có may mắn hôm nay? Hãy thử ngay!',
-                'popup_rules_text'          => "<strong>Luật chơi</strong>\n- Bạn chỉ có thể quay một lần với một Email.\n- Email đăng ký phải trùng với email lúc đặt hàng.\n- Không áp dụng với các sản phẩm đã giảm giá",
-                'popup_win_heading_text'    => 'TUYỆT VỜI! BẠN ĐÃ NHẬN ĐƯỢC {slice}',
-                'popup_win_main_text'       => "Hãy lưu lại mã coupon giảm giá và sử dụng trước ngày hết hạn\n\n{couponcode}",
-                'popup_lose_heading_text'   => 'ÔI KHÔNG!',
-                'popup_lose_main_text'      => 'Một chút xíu nữa thôi, chúc bạn may mắn lần sau.',
-                'email_win_subject'         => 'Your coupon code',
-                'email_win_message'         => "{firstname}, here is you coupon for {slice}:\n\n{couponcode}\n\nVisit us at {siteurl}",
-                'lang_enter_your_email'     => 'Nhập địa chỉ email của bạn',
-                'lang_enter_your_full_name' => 'Nhập họ tên của bạn',
-                'lang_enter_phone_number'   => 'Nhập số điện thoại của bạn',
-                'lang_i_agree'              => 'I agree with rules and privacy policy',
-                'lang_spin_button'          => 'BẮT ĐẦU',
-                'lang_continue_button'      => 'TIẾP TỤC',
-                'lang_input_missing'        => 'Vui lòng điền đầy đủ vào mẫu',
-                'lang_no_spins'             => 'Xin lỗi! chương trình đã kết thúc hoặc số phần thưởng đã hết.',
-                'lang_ace_email_check'      => 'Vui lòng cung cấp địa chỉ email hợp lệ',
-                'lang_ace_limit_reached'    => 'Bạn đã dùng hết lượt quay.',
-                'lang_coupon_notice'        => 'Mã khuyến mãi của bạn: {couponcode} thời gian sử dụng còn {timer}. Bạn có thể sử dụng khi thanh toán!',
-                'lang_close'                => 'Close',
-                'lang_days'                 => 'days',
-                'lang_spin_again'           => 'Thử lại',
-            ]
-        ];
-        $displayTemplate = [
-            //Giao diện vòng xoay
-            'style' => 1,
-            //Màu nền popup
-            'background' => 'linear-gradient(rgb(15, 12, 41), rgb(48, 43, 99), rgb(36, 36, 62))',
-            'slice_font_size' => 100,
-            'slice_font_family' => '',
-            'offers_progressbar_color' => '#9acd32',
-            'popup_heading_text_color' => '#ffffff',
-            'popup_main_text_color' => '#ffffff',
-            'notice_text_color' => '#ffffff',
-            'notice_background_color' => '#000000',
-        ];
-
-        return [
-            'text'      => $displayText,
-            'template'  => $displayTemplate
-        ];
+        return parent::insert($insertData, $oldObject);
     }
 }
 
-class WheelLog extends Model {
+class WheelLog extends SkillDo\Model\Model {
+
     static string $table = 'wheels_log';
-    static function insert($insertData = [], $object = []) {
 
-        $columnsTable = [
-            'wheel_id'          => ['int', 0],
-            'wheel_name'        => ['string'],
-            'wheel_deg_end'     => ['string'],
-            'wheel_time_end'    => ['string'],
-            'popup_rules_text'  => ['string'],
-            'slice_number'      => ['int', 0],
-            'slice_label'       => ['string'],
-            'coupon_code'       => ['string'],
-            'email'             => ['string'],
-            'fullname'          => ['string'],
-            'phone'             => ['string'],
-            'rules_checked'     => ['int', 1],
-            'ip'                => ['string'],
-            'device_id'         => ['string'],
-            'user_cookie'       => ['string'],
-            'referer'           => ['string'],
-            'timestamp'         => ['int', 0],
-            'is_read'           => ['int', 0],
-            'user_id'           => ['int', 0],
-        ];
+    static array $columns = [
+        'wheel_id'          => ['int', 0],
+        'wheel_name'        => ['string'],
+        'wheel_deg_end'     => ['string'],
+        'wheel_time_end'    => ['string'],
+        'popup_rules_text'  => ['string'],
+        'slice_number'      => ['int', 0],
+        'slice_label'       => ['string'],
+        'coupon_code'       => ['string'],
+        'email'             => ['string'],
+        'fullname'          => ['string'],
+        'phone'             => ['string'],
+        'rules_checked'     => ['int', 1],
+        'ip'                => ['string'],
+        'device_id'         => ['string'],
+        'user_cookie'       => ['string'],
+        'referer'           => ['string'],
+        'timestamp'         => ['int', 0],
+        'is_read'           => ['int', 0],
+        'user_id'           => ['int', 0],
+    ];
 
-        $columnsTable = apply_filters('columns_db_'.self::$table, $columnsTable);
-
-        $update = false;
-
-        if (!empty($insertData['id'])) {
-            $id            = (int) $insertData['id'];
-            $update        = true;
-            $oldObject = (have_posts($object)) ? $object : static::get($id);
-            if (!$oldObject) return new SKD_Error('invalid_discounts_id', __('ID log không chính xác.'));
-        }
-
-        $insertData = createdDataInsert($columnsTable, $insertData, (isset($oldObject)) ? $oldObject : null);
-
-        foreach ($columnsTable as $columnsKey => $columnsValue) {
-            ${$columnsKey}  = $insertData[$columnsKey];
-        }
-
-        $data = apply_filters('pre_insert_'.self::$table.'_data', compact(array_keys($columnsTable)), $insertData, $update ? $oldObject : null);
-
-        $model = model(self::$table);
-
-        if ($update) {
-            if(!empty($insertData['created'])) {
-                $data['created'] = $insertData['created'];
-            }
-            if(!empty($insertData['updated'])) {
-                $data['updated'] = $insertData['updated'];
-            }
-            else {
-                $data['updated'] = gmdate('Y-m-d H:i:s', time() + 7*3600);
-            }
-            $model->update($data, Qr::set($id));
-            $id = (int) $id;
-
-        } else {
-            if(!empty($insertData['created'])) {
-                $data['created'] = $insertData['created'];
-            }
-            else {
-                $data['created'] = gmdate('Y-m-d H:i:s', time() + 7*3600);
-            }
-            $id = $model->add($data);
-        }
-
-        return $id;
-    }
-    static function update($update, $args) {
-        if(!have_posts($update)) return new SKD_Error('invalid_update', __('Không có trường dữ liệu nào được cập nhật.'));
-        if(!have_posts($args)) return new SKD_Error('invalid_update', __('Không có điều kiện cập nhật.'));
-        $update['updated'] = gmdate('Y-m-d H:i:s', time() + 7*3600);
-        return apply_filters('update_'.static::$table, model(static::$table)->update($update, $args), $update, $args);
-    }
-    static function delete($objectId = 0): array|bool
-    {
-        $objectId = (int)Str::clear($objectId);
-        if($objectId == 0) return false;
-        $model = model(self::$table);
-        if($model->delete(Qr::set($objectId))) {
-            model()::table('wheels')->decrement('popup_spin');
-            return [$objectId];
-        }
-        return false;
-    }
+    static array $rules = [
+        'created'   => true,
+        'updated'   => true,
+    ];
 }
 
 class WheelHelper {
@@ -511,7 +330,7 @@ class WheelHelper {
 
         if(Auth::check()) {
             $userData = serialize(Auth::user());
-            $cacheId .= '_'.$userData;
+            $cacheId .= '_'.md5($userData);
         }
 
         $html = CacheHandler::get($cacheId);
@@ -536,7 +355,7 @@ class WheelHelper {
                 'wheelDisplay'  => $wheelDisplay,
                 'wheelText'     => $wheelText,
                 'currentUser'   => $currentUser,
-            ], true);
+            ]);
 
             CacheHandler::save($cacheId, $html);
         }

@@ -1,37 +1,40 @@
 <?php
+use JetBrains\PhpStorm\NoReturn;
+use SkillDo\Validate\Rule;
+use SkillDo\Http\Request;
+
 class AdminCouponWheelAjax {
-    static function loadRun($ci, $model): void
+    #[NoReturn]
+    static function loadRun(Request $request, $model): void
     {
-        $result['status'] 	= 'error';
-
-        $result['message'] 	= 'Load dữ liệu không thành công';
-
-        if(Request::post()) {
+        if($request->isMethod('post')) {
+            
             $args   = Qr::set('status', 'run');
+            
             $object = Wheel::get($args);
-            $result['data'] =  '';
+            
+            $result =  '';
+            
             if(have_posts($object)) {
-                $result['data'] = Plugin::partial(CP_WHEEL_NAME, 'admin/views/coupon-wheel/item', ['item' => $object], true);
+                $result = Plugin::partial(CP_WHEEL_NAME, 'admin/views/coupon-wheel/item', ['item' => $object]);
             }
-            $result['data']         = base64_encode($result['data']);
-            $result['status'] 	    = 'success';
-            $result['message'] 	    = 'Load dữ liệu thành công';
+            
+            $result = base64_encode($result);
+
+            response()->success(trans('ajax.add.success'), $result);
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.load.error'));
     }
-    static function loadOrder($ci, $model): void
+    #[NoReturn]
+    static function loadOrder(Request $request, $model): void
     {
 
-        $result['status'] 	= 'error';
+        if($request->isMethod('post')) {
 
-        $result['message'] 	= 'Load dữ liệu không thành công';
+            $page   = $request->input('page');
 
-        if(Request::post()) {
-
-            $page   = Request::post('page');
-
-            $limit  = Request::post('limit');
+            $limit  = $request->input('limit');
 
             $args   = Qr::set('status', '<>', 'run');
 
@@ -51,92 +54,72 @@ class AdminCouponWheelAjax {
 
             if(have_posts($objects)) {
                 foreach ($objects as $object) {
-                    $result['data'] .= Plugin::partial(CP_WHEEL_NAME, 'admin/views/coupon-wheel/item', ['item' => $object], true);
+                    $result['data'] .= Plugin::partial(CP_WHEEL_NAME, 'admin/views/coupon-wheel/item', ['item' => $object]);
                 }
             }
 
             $result['data']         = base64_encode($result['data']);
+
             $result['pagination']   = base64_encode($pagination->frontend());
-            $result['status'] 	    = 'success';
-            $result['message'] 	    = 'Load dữ liệu thành công';
+
+            response()->success(trans('ajax.load.success'), $result);
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.load.error'));
     }
-    static function add($ci, $model): void
+    #[NoReturn]
+    static function add(Request $request, $model): void
     {
-        $result['status'] = 'error';
-
-        $result['message'] = 'Lưu dữ liệu không thành công.';
-
-        if(Request::post()) {
+        if($request->isMethod('post')) {
 
             $wheel = [];
 
-            if(empty(Request::post('name'))) {
-                $result['message'] = 'Tên chương trình không được để trống';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['name'] = Request::post('name');
+            $validate = $request->validate([
+                'name' => Rule::make('Tên chương trình')->notEmpty(),
+                'is_live' => Rule::make('Tên chương trình')->notEmpty()->integer(),
+                'max_spins_per_user' => Rule::make('Số lần quay tối đa')->notEmpty()->integer(),
+                'reset_counter_days' => Rule::make('Thời gian lượt chơi tiếp theo')->notEmpty()->integer(),
+                'show_popup_after' => Rule::make('Thời gian tự hiển thị sau khi khách hàng truy cập')->notEmpty()->integer(),
+                'wheel_spin_time' => Rule::make('Thời gian quay của vòng quay')->notEmpty()->integer(),
+                'background' => Rule::make('Màu nền cho popup')->notEmpty(),
+                'style' => Rule::make('Màu nền cho popup')->notEmpty(),
+                'frame' => Rule::make('Kiểu khung vòng quay')->notEmpty(),
+                'center' => Rule::make('Kiểu tâm vòng quay')->notEmpty(),
+                'textColor' => Rule::make('Màu chữ popup')->notEmpty()->color(),
+                'btnRunBgColor' => Rule::make('màu nền nút quay')->notEmpty(),
+                'btnRunTxtColor' => Rule::make('màu chữ nút quay')->notEmpty(),
+            ]);
 
-            if(!is_numeric(Request::post('is_live'))) {
-                $result['message'] = 'Lưu dữ liệu không thành công.';
-                echo json_encode($result);
-                return;
+            if ($validate->fails()) {
+                response()->error($validate->errors());
             }
-            $wheel['is_live'] = Request::post('is_live');
 
-            if(!is_numeric(Request::post('max_spins_per_user'))) {
-                $result['message'] = 'Số lần quay tối đa không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['max_spins_per_user'] = Request::post('max_spins_per_user');
+            $wheel['name'] = $request->input('name');
 
-            if(!is_numeric(Request::post('reset_counter_days'))) {
-                $result['message'] = 'Thời gian lượt chơi tiếp theo không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['reset_counter_days'] = Request::post('reset_counter_days');
+            $wheel['is_live'] = $request->input('is_live');
 
-            if(!is_numeric(Request::post('show_popup_after'))) {
-                $result['message'] = 'Thời gian tự hiển thị sau khi khách hàng truy cập không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['show_popup_after'] = Request::post('show_popup_after');
+            $wheel['max_spins_per_user'] = $request->input('max_spins_per_user');
 
-            if(!is_numeric(Request::post('wheel_spin_time'))) {
-                $result['message'] = 'Thời gian quay của vòng quay không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['wheel_spin_time'] = Request::post('wheel_spin_time');
+            $wheel['reset_counter_days'] = $request->input('reset_counter_days');
 
-            $award = Request::post('award');
+            $wheel['show_popup_after'] = $request->input('show_popup_after');
+
+            $wheel['wheel_spin_time'] = $request->input('wheel_spin_time');
+
+            $award = $request->input('award');
 
             foreach (range(1,12) as $i) {
                 if(empty($award[$i]['label'])) {
-                    $result['message'] = 'Tên phần thưởng số '.$i.' không được để trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tên phần thưởng số '.$i.' không được để trống'));
                 }
                 if(!isset($award[$i]['value'])) {
-                    $result['message'] = 'Giá trị phần thưởng số '.$i.' không được để trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Giá trị phần thưởng số '.$i.' không được để trống'));
                 }
                 if(!is_numeric($award[$i]['qty'])) {
-                    $result['message'] = 'Số lần trúng phần thưởng số '.$i.' không đúng định dạng';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Số lần trúng phần thưởng số '.$i.' không được để trống'));
                 }
                 if(!is_numeric($award[$i]['percent'])) {
-                    $result['message'] = 'Tỷ lệ trúng phần thưởng số '.$i.' không đúng định dạng';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tỷ lệ trúng phần thưởng số '.$i.' không đúng định dạng'));
                 }
                 $wheel['slice'.$i.'_label']     = $award[$i]['label'];
                 $wheel['slice'.$i.'_value']     = $award[$i]['value'];
@@ -149,211 +132,140 @@ class AdminCouponWheelAjax {
             //Cấu hình giao diện
             $wheelTemplate = [];
 
-            if(empty(Request::post('background'))) {
-                $result['message'] = 'Bạn chưa chọn màu nền cho popup';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['background'] = Request::post('background');
+            $wheelTemplate['background'] = $request->input('background');
 
-            if(empty(Request::post('style'))) {
-                $result['message'] = 'Bạn chưa chọn Kiểu vòng quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['style'] = Request::post('style');
+            $wheelTemplate['style'] = $request->input('style');
 
-            if(empty(Request::post('frame'))) {
-                $result['message'] = 'Bạn chưa chọn Kiểu khung vòng quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['frame'] = Request::post('frame');
+            $wheelTemplate['frame'] = $request->input('frame');
 
-            if(empty(Request::post('center'))) {
-                $result['message'] = 'Bạn chưa chọn Kiểu tâm vòng quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['center'] = Request::post('center');
+            $wheelTemplate['center'] = $request->input('center');
 
-            if(empty(Request::post('textColor'))) {
-                $result['message'] = 'Bạn chưa chọn màu chữ popup';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['textColor'] = Request::post('textColor');
+            $wheelTemplate['textColor'] = $request->input('textColor');
 
-            if(empty(Request::post('btnRunBgColor'))) {
-                $result['message'] = 'Bạn chưa chọn màu nền nút quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['btnRunBgColor'] = Request::post('btnRunBgColor');
+            $wheelTemplate['btnRunBgColor'] = $request->input('btnRunBgColor');
 
-            if(empty(Request::post('btnRunTxtColor'))) {
-                $result['message'] = 'Bạn chưa chọn màu chữ nút quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['btnRunTxtColor'] = Request::post('btnRunTxtColor');
+            $wheelTemplate['btnRunTxtColor'] = $request->input('btnRunTxtColor');
 
-            $wheelTemplate['triggerOpen'] = (empty(Request::post('triggerOpen')))  ? 0 : 1;
+            $wheelTemplate['triggerOpen'] = (empty($request->input('triggerOpen')))  ? 0 : 1;
 
-            if(Request::post('triggerStyle') !== null) {
-                $wheelTemplate['triggerStyle'] = Request::post('triggerStyle');
+            if($request->input('triggerStyle') !== null) {
+                $wheelTemplate['triggerStyle'] = $request->input('triggerStyle');
             }
-            if(Request::post('triggerEffect') !== null) {
-                $wheelTemplate['triggerEffect'] = Request::post('triggerEffect');
+            if($request->input('triggerEffect') !== null) {
+                $wheelTemplate['triggerEffect'] = $request->input('triggerEffect');
             }
-            if(Request::post('triggerBg') !== null) {
-                $wheelTemplate['triggerBg'] = Request::post('triggerBg');
+            if($request->input('triggerBg') !== null) {
+                $wheelTemplate['triggerBg'] = $request->input('triggerBg');
             }
-            if(Request::post('triggerIcon') !== null) {
-                $wheelTemplate['triggerIcon'] = FileHandler::handlingUrl(Request::post('triggerIcon'));
+            if($request->input('triggerIcon') !== null) {
+                $wheelTemplate['triggerIcon'] = FileHandler::handlingUrl($request->input('triggerIcon'));
             }
 
             //Cấu hình văn bản
             $wheelText = [];
 
-            $displayText = Request::post('displayText');
+            $displayText = $request->input('displayText');
 
             $languages = Language::list();
 
-            $hasMulti = Language::hasMulti();
+            $hasMulti = Language::isMulti();
 
             foreach ($languages as $langKey => $language) {
 
                 if(empty($displayText[$langKey]['popup_heading_text'])) {
-                    $result['message'] = 'Tiêu đề lớn'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tiêu đề lớn'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_heading_text'] = $displayText[$langKey]['popup_heading_text'];
 
                 if(empty($displayText[$langKey]['popup_rules_text'])) {
-                    $result['message'] = 'Mô tả luật quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả luật quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_rules_text'] = $displayText[$langKey]['popup_rules_text'];
 
                 if(empty($displayText[$langKey]['popup_main_text'])) {
-                    $result['message'] = 'Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_main_text'] = $displayText[$langKey]['popup_main_text'];
 
                 if(empty($displayText[$langKey]['popup_win_heading_text'])) {
-                    $result['message'] = 'Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_win_heading_text'] = $displayText[$langKey]['popup_win_heading_text'];
 
                 if(empty($displayText[$langKey]['popup_win_main_text'])) {
-                    $result['message'] = 'Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_win_main_text'] = $displayText[$langKey]['popup_win_main_text'];
 
                 if(empty($displayText[$langKey]['popup_lose_heading_text'])) {
-                    $result['message'] = 'Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_lose_heading_text'] = $displayText[$langKey]['popup_lose_heading_text'];
 
                 if(empty($displayText[$langKey]['popup_lose_main_text'])) {
-                    $result['message'] = 'Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_lose_main_text'] = $displayText[$langKey]['popup_lose_main_text'];
 
                 if(empty($displayText[$langKey]['lang_enter_your_full_name'])) {
-                    $result['message'] = 'Ô nhập họ tên'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Ô nhập họ tên'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_enter_your_full_name'] = $displayText[$langKey]['lang_enter_your_full_name'];
 
                 if(empty($displayText[$langKey]['lang_enter_your_email'])) {
-                    $result['message'] = 'Ô nhập email'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Ô nhập email'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_enter_your_email'] = $displayText[$langKey]['lang_enter_your_email'];
 
                 if(empty($displayText[$langKey]['lang_enter_phone_number'])) {
-                    $result['message'] = 'Ô nhập số điện thoại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Ô nhập số điện thoại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_enter_phone_number'] = $displayText[$langKey]['lang_enter_phone_number'];
 
                 if(empty($displayText[$langKey]['lang_spin_button'])) {
-                    $result['message'] = 'Chữ nút quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Chữ nút quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_spin_button'] = $displayText[$langKey]['lang_spin_button'];
 
                 if(empty($displayText[$langKey]['lang_continue_button'])) {
-                    $result['message'] = 'Chữ nút tiếp tục'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Chữ nút tiếp tục'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_continue_button'] = $displayText[$langKey]['lang_continue_button'];
 
                 if(empty($displayText[$langKey]['lang_spin_again'])) {
-                    $result['message'] = 'Chữ nút thử lại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Chữ nút thử lại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_spin_again'] = $displayText[$langKey]['lang_spin_again'];
 
                 if(empty($displayText[$langKey]['lang_input_missing'])) {
-                    $result['message'] = 'Thông báo khi điền không đủ thông tin'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Thông báo khi điền không đủ thông tin'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_input_missing'] = $displayText[$langKey]['lang_input_missing'];
 
                 if(empty($displayText[$langKey]['lang_no_spins'])) {
-                    $result['message'] = 'Thông báo khi không còn quà'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Thông báo khi không còn quà'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_no_spins'] = $displayText[$langKey]['lang_no_spins'];
 
                 if(empty($displayText[$langKey]['lang_ace_email_check'])) {
-                    $result['message'] = 'Thông báo khi trường email không hợp lệ'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Thông báo khi trường email không hợp lệ'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_ace_email_check'] = $displayText[$langKey]['lang_ace_email_check'];
 
                 if(empty($displayText[$langKey]['lang_ace_limit_reached'])) {
-                    $result['message'] = 'Thông báo khi hết lượt quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Thông báo khi hết lượt quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_ace_limit_reached'] = $displayText[$langKey]['lang_ace_limit_reached'];
 
                 if(empty($displayText[$langKey]['lang_close'])) {
-                    $result['message'] = 'Xác nhận khi đóng vòng quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Xác nhận khi đóng vòng quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_close'] = $displayText[$langKey]['lang_close'];
             }
 
-            $wheel['require_email'] = (empty(Request::post('require_email')))  ? 0 : 1;
+            $wheel['require_email'] = (empty($request->input('require_email')))  ? 0 : 1;
 
-            $wheel['require_user'] = (empty(Request::post('require_user')))  ? 0 : 1;
+            $wheel['require_user'] = (empty($request->input('require_user')))  ? 0 : 1;
 
             $wheel['status'] = 'pending';
 
@@ -365,98 +277,73 @@ class AdminCouponWheelAjax {
 
                 Wheel::updateMeta($id, 'displayText', $wheelText);
 
-                $result['status'] = 'success';
-
-                $result['message'] = 'Thêm dữ liệu thành công!';
+                response()->success(trans('ajax.save.success'));
             }
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.save.error'));
     }
-    static function save($ci, $model): void
+    #[NoReturn]
+    static function save(Request $request, $model): void
     {
-        $result['status'] = 'error';
+        if($request->isMethod('post')) {
 
-        $result['message'] = 'Lưu dữ liệu không thành công.';
-
-        if(Request::post()) {
-
-            $id         = (int)Request::post('id');
+            $id         = (int)$request->input('id');
 
             $object  = Wheel::get($id);
 
             if(!have_posts($object)) {
-                $result['message'] = 'Chương trình vòng quay này không tồn tại trên hệ thống';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Chương trình vòng quay này không tồn tại trên hệ thống'));
+            }
+
+            $validate = $request->validate([
+                'name' => Rule::make('Tên chương trình')->notEmpty(),
+                'is_live' => Rule::make('Tên chương trình')->notEmpty()->integer(),
+                'max_spins_per_user' => Rule::make('Số lần quay tối đa')->notEmpty()->integer(),
+                'reset_counter_days' => Rule::make('Thời gian lượt chơi tiếp theo')->notEmpty()->integer(),
+                'show_popup_after' => Rule::make('Thời gian tự hiển thị sau khi khách hàng truy cập')->notEmpty()->integer(),
+                'wheel_spin_time' => Rule::make('Thời gian quay của vòng quay')->notEmpty()->integer(),
+                'background' => Rule::make('Màu nền cho popup')->notEmpty(),
+                'style' => Rule::make('Màu nền cho popup')->notEmpty(),
+                'frame' => Rule::make('Kiểu khung vòng quay')->notEmpty(),
+                'center' => Rule::make('Kiểu tâm vòng quay')->notEmpty(),
+                'textColor' => Rule::make('Màu chữ popup')->notEmpty()->color(),
+                'btnRunBgColor' => Rule::make('màu nền nút quay')->notEmpty(),
+                'btnRunTxtColor' => Rule::make('màu chữ nút quay')->notEmpty(),
+            ]);
+
+            if ($validate->fails()) {
+                response()->error($validate->errors());
             }
 
             $wheel = [];
 
-            if(empty(Request::post('name'))) {
-                $result['message'] = 'Tên chương trình không được để trống';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['name'] = Request::post('name');
+            $wheel['name'] = $request->input('name');
 
-            if(!is_numeric(Request::post('is_live'))) {
-                $result['message'] = 'Lưu dữ liệu không thành công.';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['is_live'] = Request::post('is_live');
+            $wheel['is_live'] = $request->input('is_live');
 
-            if(!is_numeric(Request::post('max_spins_per_user'))) {
-                $result['message'] = 'Số lần quay tối đa không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['max_spins_per_user'] = Request::post('max_spins_per_user');
+            $wheel['max_spins_per_user'] = $request->input('max_spins_per_user');
 
-            if(!is_numeric(Request::post('reset_counter_days'))) {
-                $result['message'] = 'Thời gian lượt chơi tiếp theo không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['reset_counter_days'] = Request::post('reset_counter_days');
+            $wheel['reset_counter_days'] = $request->input('reset_counter_days');
 
-            if(!is_numeric(Request::post('show_popup_after'))) {
-                $result['message'] = 'Thời gian tự hiển thị sau khi khách hàng truy cập không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['show_popup_after'] = Request::post('show_popup_after');
+            $wheel['show_popup_after'] = $request->input('show_popup_after');
 
-            if(!is_numeric(Request::post('wheel_spin_time'))) {
-                $result['message'] = 'Thời gian quay của vòng quay không đúng định dạng';
-                echo json_encode($result);
-                return;
-            }
-            $wheel['wheel_spin_time'] = Request::post('wheel_spin_time');
+            $wheel['wheel_spin_time'] = $request->input('wheel_spin_time');
 
-            $award = Request::post('award');
+            $award = $request->input('award');
 
             foreach (range(1,12) as $i) {
                 if(empty($award[$i]['label'])) {
-                    $result['message'] = 'Tên phần thưởng số '.$i.' không được để trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tên phần thưởng số '.$i.' không được để trống'));
                 }
                 if(!isset($award[$i]['value'])) {
-                    $result['message'] = 'Giá trị phần thưởng số '.$i.' không được để trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Giá trị phần thưởng số '.$i.' không được để trống'));
                 }
                 if(!is_numeric($award[$i]['qty'])) {
-                    $result['message'] = 'Số lần trúng phần thưởng số '.$i.' không đúng định dạng';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Số lần trúng phần thưởng số '.$i.' không được để trống'));
                 }
                 if(!is_numeric($award[$i]['percent'])) {
-                    $result['message'] = 'Tỷ lệ trúng phần thưởng số '.$i.' không đúng định dạng';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tỷ lệ trúng phần thưởng số '.$i.' không đúng định dạng'));
                 }
                 $wheel['slice'.$i.'_label']     = $award[$i]['label'];
                 $wheel['slice'.$i.'_value']     = $award[$i]['value'];
@@ -469,177 +356,115 @@ class AdminCouponWheelAjax {
             //Cấu hình giao diện
             $wheelTemplate = [];
 
-            if(empty(Request::post('background'))) {
-                $result['message'] = 'Bạn chưa chọn màu nền cho popup';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['background'] = Request::post('background');
+            $wheelTemplate['background'] = $request->input('background');
 
-            if(empty(Request::post('style'))) {
-                $result['message'] = 'Bạn chưa chọn Kiểu vòng quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['style'] = Request::post('style');
+            $wheelTemplate['style'] = $request->input('style');
 
-            if(empty(Request::post('frame'))) {
-                $result['message'] = 'Bạn chưa chọn Kiểu khung vòng quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['frame'] = Request::post('frame');
+            $wheelTemplate['frame'] = $request->input('frame');
 
-            if(empty(Request::post('center'))) {
-                $result['message'] = 'Bạn chưa chọn Kiểu tâm vòng quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['center'] = Request::post('center');
+            $wheelTemplate['center'] = $request->input('center');
 
-            if(empty(Request::post('textColor'))) {
-                $result['message'] = 'Bạn chưa chọn màu chữ popup';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['textColor'] = Request::post('textColor');
+            $wheelTemplate['textColor'] = $request->input('textColor');
 
-            if(empty(Request::post('btnRunBgColor'))) {
-                $result['message'] = 'Bạn chưa chọn màu nền nút quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['btnRunBgColor'] = Request::post('btnRunBgColor');
+            $wheelTemplate['btnRunBgColor'] = $request->input('btnRunBgColor');
 
-            if(empty(Request::post('btnRunTxtColor'))) {
-                $result['message'] = 'Bạn chưa chọn màu chữ nút quay';
-                echo json_encode($result);
-                return;
-            }
-            $wheelTemplate['btnRunTxtColor'] = Request::post('btnRunTxtColor');
+            $wheelTemplate['btnRunTxtColor'] = $request->input('btnRunTxtColor');
 
+            $wheelTemplate['triggerOpen'] = (empty($request->input('triggerOpen')))  ? 0 : 1;
 
-            $wheelTemplate['triggerOpen'] = (empty(Request::post('triggerOpen')))  ? 0 : 1;
-
-            if(Request::post('triggerStyle') !== null) {
-                $wheelTemplate['triggerStyle'] = Request::post('triggerStyle');
+            if($request->input('triggerStyle') !== null) {
+                $wheelTemplate['triggerStyle'] = $request->input('triggerStyle');
             }
-            if(Request::post('triggerEffect') !== null) {
-                $wheelTemplate['triggerEffect'] = Request::post('triggerEffect');
+            if($request->input('triggerEffect') !== null) {
+                $wheelTemplate['triggerEffect'] = $request->input('triggerEffect');
             }
-            if(Request::post('triggerBg') !== null) {
-                $wheelTemplate['triggerBg'] = Request::post('triggerBg');
+            if($request->input('triggerBg') !== null) {
+                $wheelTemplate['triggerBg'] = $request->input('triggerBg');
             }
-            if(Request::post('triggerIcon') !== null) {
-                $wheelTemplate['triggerIcon'] = FileHandler::handlingUrl(Request::post('triggerIcon'));
+            if($request->input('triggerIcon') !== null) {
+                $wheelTemplate['triggerIcon'] = FileHandler::handlingUrl($request->input('triggerIcon'));
             }
 
             //Cấu hình văn bản
             $wheelText = [];
 
-            $displayText = Request::post('displayText');
+            $displayText = $request->input('displayText');
 
             $languages = Language::list();
 
-            $hasMulti = Language::hasMulti();
+            $hasMulti = Language::isMulti();
 
             foreach ($languages as $langKey => $language) {
 
                 if(empty($displayText[$langKey]['popup_heading_text'])) {
-                    $result['message'] = 'Tiêu đề lớn'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tiêu đề lớn'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_heading_text'] = $displayText[$langKey]['popup_heading_text'];
 
                 if(empty($displayText[$langKey]['popup_rules_text'])) {
-                    $result['message'] = 'Mô tả luật quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả luật quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_rules_text'] = $displayText[$langKey]['popup_rules_text'];
 
                 if(empty($displayText[$langKey]['popup_main_text'])) {
-                    $result['message'] = 'Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_main_text'] = $displayText[$langKey]['popup_main_text'];
 
                 if(empty($displayText[$langKey]['popup_win_heading_text'])) {
-                    $result['message'] = 'Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_win_heading_text'] = $displayText[$langKey]['popup_win_heading_text'];
 
                 if(empty($displayText[$langKey]['popup_win_main_text'])) {
-                    $result['message'] = 'Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_win_main_text'] = $displayText[$langKey]['popup_win_main_text'];
 
                 if(empty($displayText[$langKey]['popup_lose_heading_text'])) {
-                    $result['message'] = 'Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Tiêu đề'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_lose_heading_text'] = $displayText[$langKey]['popup_lose_heading_text'];
 
                 if(empty($displayText[$langKey]['popup_lose_main_text'])) {
-                    $result['message'] = 'Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Mô tả'.($hasMulti ? ' ('.$language['label'].')' : '').' khi khách quay không nhận được quà tặng không được bỏ trống'));
                 }
                 $wheelText[$langKey]['popup_lose_main_text'] = $displayText[$langKey]['popup_lose_main_text'];
 
                 if(empty($displayText[$langKey]['lang_enter_your_full_name'])) {
-                    $result['message'] = 'Ô nhập họ tên'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Ô nhập họ tên'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_enter_your_full_name'] = $displayText[$langKey]['lang_enter_your_full_name'];
 
                 if(empty($displayText[$langKey]['lang_enter_your_email'])) {
-                    $result['message'] = 'Ô nhập email'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Ô nhập email'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_enter_your_email'] = $displayText[$langKey]['lang_enter_your_email'];
 
                 if(empty($displayText[$langKey]['lang_enter_phone_number'])) {
-                    $result['message'] = 'Ô nhập số điện thoại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Ô nhập số điện thoại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_enter_phone_number'] = $displayText[$langKey]['lang_enter_phone_number'];
 
                 if(empty($displayText[$langKey]['lang_spin_button'])) {
-                    $result['message'] = 'Chữ nút quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Chữ nút quay'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_spin_button'] = $displayText[$langKey]['lang_spin_button'];
 
                 if(empty($displayText[$langKey]['lang_continue_button'])) {
-                    $result['message'] = 'Chữ nút tiếp tục'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Chữ nút tiếp tục'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_continue_button'] = $displayText[$langKey]['lang_continue_button'];
 
                 if(empty($displayText[$langKey]['lang_spin_again'])) {
-                    $result['message'] = 'Chữ nút thử lại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống';
-                    echo json_encode($result);
-                    return;
+                    response()->error(trans('Chữ nút thử lại'.($hasMulti ? ' ('.$language['label'].')' : '').' không được bỏ trống'));
                 }
                 $wheelText[$langKey]['lang_spin_again'] = $displayText[$langKey]['lang_spin_again'];
             }
 
-            $wheel['require_email'] = (empty(Request::post('require_email')))  ? 0 : 1;
+            $wheel['require_email'] = (empty($request->input('require_email')))  ? 0 : 1;
 
-            $wheel['require_user'] = (empty(Request::post('require_user')))  ? 0 : 1;
+            $wheel['require_user'] = (empty($request->input('require_user')))  ? 0 : 1;
 
             $wheel['id'] = $object->id;
 
@@ -655,50 +480,37 @@ class AdminCouponWheelAjax {
 
                 Wheel::updateMeta($id, 'displayText', $wheelText);
 
-                $result['status'] = 'success';
-
-                $result['message'] = 'Cập nhật dữ liệu thành công!';
+                response()->success(trans('ajax.save.success'));
             }
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.save.error'));
     }
-    static function status($ci, $model): void {
+    #[NoReturn]
+    static function status(Request $request, $model): void {
 
-        $result['status'] = 'error';
+        if($request->isMethod('post')) {
 
-        $result['message'] = 'Lưu dữ liệu không thành công.';
-
-        if(Request::post()) {
-
-            $id     = (int)Request::post('id');
+            $id     = (int)$request->input('id');
 
             $wheel  = Wheel::get($id);
 
             if(!have_posts($wheel)) {
-                $result['message'] = 'Chương trình vòng quay này không tồn tại trên hệ thống';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Chương trình vòng quay này không tồn tại trên hệ thống'));
             }
 
-            $status = trim((string)Request::post('status'));
+            $status = trim((string)$request->input('status'));
 
             if(empty($status)) {
-                $result['message'] = 'Trạng thái không được để trống';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Trạng thái không được để trống'));
             }
 
             if(empty(WheelHelper::status($status))) {
-                $result['message'] = 'Trạng thái không đúng định dạng';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Trạng thái không đúng định dạng'));
             }
 
             if($wheel->status == $status) {
-                $result['message'] = 'Trạng thái chương trình không thay đổi';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Trạng thái chương trình không thay đổi'));
             }
 
             $id = Wheel::insert([
@@ -707,43 +519,42 @@ class AdminCouponWheelAjax {
             ], $wheel);
 
             if(!is_skd_error($id)) {
+
                 CacheHandler::delete('coupon_wheel_popup_'.md5($wheel->id));
+
                 CacheHandler::delete('coupon_wheel_popup_run');
-                $result['status'] = 'success';
-                $result['message'] = 'Cập nhật dữ liệu thành công!';
+
+                response()->success(trans('ajax.save.success'));
             }
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.save.error'));
     }
-    static function delete($ci, $model): void {
+    #[NoReturn]
+    static function delete(Request $request, $model): void {
 
-        $result['status'] = 'error';
+        if($request->isMethod('post')) {
 
-        $result['message'] = 'Xóa liệu không thành công.';
-
-        if(Request::post()) {
-
-            $id     = (int)Request::post('data');
+            $id     = (int)$request->input('data');
 
             $wheel  = Wheel::get($id);
 
             if(!have_posts($wheel)) {
-                $result['message'] = 'vòng quay này không tồn tại trên hệ thống';
-                echo json_encode($result);
-                return;
+
+                response()->error(trans('vòng quay này không tồn tại trên hệ thống'));
             }
 
             if(Wheel::delete($id)) {
 
                 CacheHandler::delete('coupon_wheel_popup_'.md5($id));
+
                 CacheHandler::delete('coupon_wheel_popup_run');
-                $result['status'] = 'success';
-                $result['message'] = 'Xóa dữ liệu thành công!';
+
+                response()->success(trans('ajax.delete.success'));
             }
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.delete.error'));
     }
 }
 Ajax::admin('AdminCouponWheelAjax::loadRun');
@@ -754,7 +565,7 @@ Ajax::admin('AdminCouponWheelAjax::status');
 Ajax::admin('AdminCouponWheelAjax::delete');
 
 class CouponWheelAjax {
-    static function renderPopup($ci, $model): void
+    static function renderPopup(Request $request, $model): void
     {
         $cacheId = 'coupon_wheel_popup_run';
 
@@ -777,42 +588,31 @@ class CouponWheelAjax {
 
         WheelHelper::renderPopup($wheel);
     }
-    static function run($ci, $model): void {
+    #[NoReturn]
+    static function run(Request $request, $model): void {
 
-        $result['status'] = 'error';
-
-        $result['message'] = 'Lưu dữ liệu không thành công.';
-
-        if(Request::post()) {
+        if($request->isMethod('post')) {
 
             $_COOKIE['couponWheel_session'] = WheelHelper::cookies();
 
-            $id = (int)Request::post('wheel_hash');
+            $id = (int)$request->input('wheel_hash');
 
             $wheel = Wheel::get(Qr::set($id)->where('status', 'run'));
 
             if(!have_posts($wheel)) {
-                $result['message'] = 'Chương trình vòng quay mai mắn đã tạm dừng hoặc không còn tồn tại.';
-                echo json_encode($result);
-                return;
+                response()->error(trans('wheel.ajax.run.error.notFound'));
             }
 
             if($wheel->is_live == 1 && Device::isMobile()) {
-                $result['message'] = 'vòng quay không tồn tại.';
-                echo json_encode($result);
-                return;
+                response()->error(trans('wheel.ajax.run.error.exits'));
             }
 
             if($wheel->is_live == 2 && !Device::isMobile()) {
-                $result['message'] = 'vòng quay không tồn tại.';
-                echo json_encode($result);
-                return;
+                response()->error(trans('wheel.ajax.run.error.exits'));
             }
 
             if($wheel->require_user == 1 && !Auth::check()) {
-                $result['message'] = 'Chương trình vòng quay mai mắn này chỉ áp dụng cho khách hàng đã đăng ký thành viên.';
-                echo json_encode($result);
-                return;
+                response()->error(trans('wheel.ajax.run.error.user'));
             }
 
             $displayText = WheelHelper::displayText($wheel->id);
@@ -842,45 +642,36 @@ class CouponWheelAjax {
             }
 
             if (!isset($_COOKIE['couponWheel_session'])) {
-                $result['message'] = 'Spin error, cannot set cookies. Please reload webpage.';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Spin error, cannot set cookies. Please reload webpage.'));
             }
 
             if($wheel->require_email) {
-                if(empty(Request::post('email'))) {
-                    $result['message'] = $displayText['lang_input_missing'];
-                    echo json_encode($result);
-                    return;
+                if(empty($request->input('email'))) {
+                    response()->error($displayText['lang_input_missing']);
                 }
-                if (!WheelHelper::validateEmail(Request::post('email'))) {
-                    $result['message'] = $displayText['lang_ace_email_check'];
-                    echo json_encode($result);
-                    return;
+                if (!WheelHelper::validateEmail($request->input('email'))) {
+                    response()->error($displayText['lang_ace_email_check']);
                 }
-                $limitData['email'] = Request::post('email');
-                $wheelLog['email'] = Request::post('email');
+                $limitData['email'] = $request->input('email');
+
+                $wheelLog['email'] = $request->input('email');
             }
 
-            if(empty(Request::post('fullname'))) {
-                $result['message'] = $displayText['lang_input_missing'];
-                echo json_encode($result);
-                return;
+            if(empty($request->input('fullname'))) {
+                response()->error($displayText['lang_input_missing']);
             }
-            $wheelLog['fullname'] = Request::post('fullname');
+            $wheelLog['fullname'] = $request->input('fullname');
 
-            if(empty(Request::post('phone'))) {
-                $result['message'] = $displayText['lang_input_missing'];
-                echo json_encode($result);
-                return;
+            if(empty($request->input('phone'))) {
+                response()->error($displayText['lang_input_missing']);
             }
-            $limitData['phone'] = Request::post('phone');
-            $wheelLog['phone'] = Request::post('phone');
+
+            $limitData['phone'] = $request->input('phone');
+
+            $wheelLog['phone'] = $request->input('phone');
 
             if(!WheelHelper::validateLimit($limitData, $wheel)) {
-                $result['message'] = $displayText['lang_ace_limit_reached'];
-                echo json_encode($result);
-                return;
+                response()->error($displayText['lang_ace_limit_reached']);
             }
 
             $available_slices = array();
@@ -908,9 +699,7 @@ class CouponWheelAjax {
             }
 
             if(empty($available_slices)) {
-                $result['message'] = $displayText['lang_no_spins'];
-                echo json_encode($result);
-                return;
+                response()->error($displayText['lang_no_spins']);
             }
 
             $wheel_slice_number = $available_slices[array_rand($available_slices)];
@@ -938,14 +727,12 @@ class CouponWheelAjax {
             $wheel_run_id = WheelLog::insert($wheelLog);
 
             if(is_skd_error($wheel_run_id)) {
-                $result['message'] = $wheel_run_id->errors[0]->error;
-                echo json_encode($result);
-                return;
+                response()->error($wheel_run_id);
             }
 
             CacheHandler::delete('coupon_wheel_log_is_read');
 
-            model()::table('wheels')->increment('popup_spin');
+            model('wheels')->increment('popup_spin');
 
             setcookie("couponWheel$wheel->id"."_seen", $wheel->seen_key, strtotime("+$wheel->reset_counter_days days"),'/');
 
@@ -970,32 +757,28 @@ class CouponWheelAjax {
             }
             else {
 
-                //$result['on_win_url'] = $wheel->on_win_url;
-
                 $result['stage2_heading_text'] = do_shortcode(template_parser($displayText['popup_win_heading_text'],$template_vars));
 
                 $result['stage2_main_text'] = do_shortcode(template_parser($displayText['popup_win_main_text'],$template_vars));
             }
 
-            $result['status'] = 'success';
+            $result['data'] = '';
 
-            $result['message'] = 'Thành công.';
+            response()->success(trans('ajax.save.success'), $result);
         }
 
-        echo json_encode($result);
-
-        return;
+        response()->error(trans('ajax.save.error'));
     }
-    static function event($ci, $model): void
+    static function event(Request $request, $model): void
     {
-        $id     = (int)Request::post('id');
+        $id     = (int)$request->input('id');
 
         $wheel  = Wheel::get(Qr::set($id));
 
         if (!have_posts($wheel)) return;
 
-        if (Request::post('code') == 'show_popup') {
-            model()::table('wheels')->increment('popup_impressions');
+        if ($request->input('code') == 'show_popup') {
+            model('wheels')->increment('popup_impressions');
         }
     }
 }
@@ -1004,32 +787,34 @@ Ajax::client('CouponWheelAjax::run');
 Ajax::client('CouponWheelAjax::event');
 
 class AdminCouponWheelLogAjax {
-    static function load($ci, $model): void
+    #[NoReturn]
+    static function load(Request $request, $model): void
     {
+        if($request->isMethod('post')) {
 
-        $result['status'] 	= 'error';
+            $page    = $request->input('page');
 
-        $result['message'] 	= 'Load dữ liệu không thành công';
+            $page   = (is_null($page) || empty($page)) ? 1 : (int)$page;
 
-        if(Request::post()) {
+            $limit  = $request->input('limit');
 
-            $page   = Request::post('page');
+            $limit   = (is_null($limit) || empty($limit)) ? 10 : (int)$limit;
 
-            $limit  = Request::post('limit');
+            $recordsTotal   = $request->input('recordsTotal');
 
-            $args   = Qr::set();
+            $args = Qr::set();
 
-            $keyword = Str::clear(Request::post('name'));
+            $keyword = Str::clear($request->input('name'));
             if(!empty($keyword)) {
                 $args->where('fullname', 'like', '%'.$keyword.'%');
             }
 
-            $phone = Str::clear(Request::post('phone'));
+            $phone = Str::clear($request->input('phone'));
             if(!empty($phone)) {
                 $args->where('phone', 'like', '%'.$phone.'%');
             }
 
-            $time = Str::clear(Request::post('time'));
+            $time = Str::clear($request->input('time'));
             if(!empty($time)) {
                 $time = explode(' - ', $time);
                 if(have_posts($time) && count($time) == 2) {
@@ -1039,75 +824,95 @@ class AdminCouponWheelLogAjax {
                     $args->where('created', '<=', $timeEnd);
                 }
             }
+            /**
+             * @since 7.0.0
+             */
+            $args = apply_filters('admin_wheelLog_controllers_index_args_before_count', $args);
 
-            $total  = WheelLog::count($args);
-
-            # [Pagination]
-            $url = '#{page}';
-
-            $pagination = pagination($total, $url, $limit, $page);
-
-            # [Data]
-            $args->limit($limit)->offset($pagination->offset())->orderByDesc('created');
-
-            $objects = WheelLog::gets($args);
-
-            $result['data'] = '';
-
-            if(have_posts($objects)) {
-                foreach ($objects as $object) {
-                    $result['data'] .= Plugin::partial(CP_WHEEL_NAME, 'admin/views/coupon-wheel-log/item', ['item' => $object], true);
-                }
+            if(!is_numeric($recordsTotal)) {
+                $recordsTotal = apply_filters('admin_wheelLog_controllers_index_count', WheelLog::count($args), $args);
             }
 
-            $result['data']         = base64_encode($result['data']);
-            $result['pagination']   = base64_encode($pagination->frontend());
-            $result['status'] 	    = 'success';
-            $result['message'] 	    = 'Load dữ liệu thành công';
+
+            # [List data]
+            $args->limit($limit)
+                ->offset(($page - 1)*$limit)
+                ->orderBy('order')
+                ->orderBy('created', 'desc');
+
+            $args = apply_filters('admin_wheelLog_controllers_index_args', $args);
+
+            $objects = apply_filters('admin_wheelLog_controllers_index_objects', WheelLog::gets($args), $args);
+
+            $args = [
+                'items' => $objects,
+                'table' => 'wheelLog',
+                'model' => model('wheels_log'),
+                'module'=> 'wheelLog',
+            ];
+
+            $table = new AdminWheelLogTable($args);
+            $table->get_columns();
+            ob_start();
+            $table->display_rows_or_message();
+            $html = ob_get_contents();
+            ob_end_clean();
+
+            $buttonsBulkAction = apply_filters('table_wheelLog_bulk_action_buttons', []);
+
+            $bulkAction = Admin::partial('include/table/header/bulk-action-buttons', [
+                'actionList' => $buttonsBulkAction
+            ]);
+
+            $result['data'] = [
+                'html'          => base64_encode($html),
+                'bulkAction'    => base64_encode($bulkAction),
+            ];
+            $result['pagination']   = [
+                'limit' => $limit,
+                'total' => $recordsTotal,
+                'page'  => (int)$page,
+            ];
+
+            response()->success(trans('ajax.load.success'), $result);
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.load.error'));
     }
-    static function isRead($ci, $model): void
+    #[NoReturn]
+    static function isRead(Request $request, $model): void
     {
-        $result['status'] 	= 'error';
-        $result['message'] 	= 'Load dữ liệu không thành công';
-        if(Request::post()) {
-            WheelLog::update(['is_read' => 1], Qr::set('is_read', 0));
+        if($request->isMethod('post')) {
+
+            WheelLog::where('is_read', 0)->update(['is_read' => 1]);
+
             CacheHandler::delete('coupon_wheel_log_is_read');
-            $result['status'] 	    = 'success';
-            $result['message'] 	    = 'Load dữ liệu thành công';
+
+            response()->success(trans('ajax.update.success'));
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.update.error'));
     }
-    static function delete($ci, $model): void {
+    #[NoReturn]
+    static function delete(Request $request, $model): void {
 
-        $result['status'] = 'error';
+        if($request->isMethod('post')) {
 
-        $result['message'] = 'Xóa liệu không thành công.';
-
-        if(Request::post()) {
-
-            $id     = (int)Request::post('data');
+            $id     = (int)$request->input('data');
 
             $wheelLog  = WheelLog::get($id);
 
             if(!have_posts($wheelLog)) {
-                $result['message'] = 'Kết quả lượt chơi này không tồn tại trên hệ thống';
-                echo json_encode($result);
-                return;
+                response()->error(trans('Kết quả lượt chơi này không tồn tại trên hệ thống'));
             }
 
             if(WheelLog::delete($id)) {
 
-                $result['status'] = 'success';
-
-                $result['message'] = 'Xóa dữ liệu thành công!';
+                response()->success(trans('ajax.delete.success'));
             }
         }
 
-        echo json_encode($result);
+        response()->error(trans('ajax.delete.error'));
     }
 }
 Ajax::admin('AdminCouponWheelLogAjax::load');

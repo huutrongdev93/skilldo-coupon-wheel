@@ -2,9 +2,8 @@
 class CouponWheelMigration {
     static function created(): void
     {
-        $model = model();
-        if(!$model::schema()->hasTable('wheels')) {
-            $model::schema()->create('wheels', function ($table) {
+        if(!schema()->hasTable('wheels')) {
+            schema()->create('wheels', function ($table) {
                 $table->increments('id');
                 $table->string('name', 255)->collate('utf8mb4_unicode_ci')->nullable();
                 $table->char('seen_key', 6)->collate('utf8mb4_unicode_ci');
@@ -39,8 +38,8 @@ class CouponWheelMigration {
                 $table->integer('order')->default(0);
             });
         }
-        if(!$model::schema()->hasTable('wheels_metadata')) {
-            $model::schema()->create('wheels_metadata', function ($table) {
+        if(!schema()->hasTable('wheels_metadata')) {
+            schema()->create('wheels_metadata', function ($table) {
                 $table->increments('id');
                 $table->integer('object_id')->default(0);
                 $table->string('meta_key', 255)->nullable();
@@ -51,8 +50,8 @@ class CouponWheelMigration {
                 $table->index('object_id');
             });
         }
-        if(!$model::schema()->hasTable('wheels_log')) {
-            $model::schema()->create('wheels_log', function ($table) {
+        if(!schema()->hasTable('wheels_log')) {
+            schema()->create('wheels_log', function ($table) {
                 $table->increments('id');
                 $table->integer('wheel_id')->default(0);
                 $table->string('wheel_name', 255)->collate('utf8mb4_unicode_ci')->nullable();
@@ -82,8 +81,8 @@ class CouponWheelMigration {
 
     static function drop(): void
     {
-        model()::schema()->drop('wheels');
-        model()::schema()->drop('wheels_metadata');
-        model()::schema()->drop('wheels_log');
+        schema()->drop('wheels');
+        schema()->drop('wheels_metadata');
+        schema()->drop('wheels_log');
     }
 }
