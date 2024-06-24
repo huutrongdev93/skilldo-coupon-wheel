@@ -16,11 +16,11 @@ class CouponWheelTableHandle {
 
 		let self = this;
 
-		$.post(ajax, data, function (data) { }, 'json').done(function (response) {
+		request.post(ajax, data).then(function (response) {
 
 			$('.loading').hide();
 
-			if (response.status === 'error') show_message(response.message, response.status);
+			if (response.status === 'error') SkilldoMessage.error(response.message);
 
 			if (response.status === 'success') {
 
@@ -44,11 +44,11 @@ class CouponWheelTableHandle {
 
 		let self = this;
 
-		$.post(ajax, data, function (data) { }, 'json').done(function (response) {
+		request.post(ajax, data).then(function (response) {
 
 			$('.loading').hide();
 
-			if (response.status === 'error') show_message(response.message, response.status);
+			if (response.status === 'error') SkilldoMessage.error(response.message);
 
 			if (response.status === 'success') {
 
@@ -82,7 +82,7 @@ class CouponWheelTableHandle {
 			id: element.attr('data-id')
 		}
 
-		$.post(ajax, data, function () {}, 'json').done(function (response) {
+		request.post(ajax, data).then(function (response) {
 		    if (response.status === 'success') {
 			    self.loadRun();
 			    self.loadOrder();
@@ -105,8 +105,8 @@ class CouponWheelHandle {
 
 		data.action = 'AdminCouponWheelAjax::add';
 
-		$.post(ajax, data, function () {}, 'json').done(function (response) {
-			show_message(response.message, response.status)
+		request.post(ajax, data).then(function(response) {
+			SkilldoMessage.response(response);
 		    if (response.status === 'success') {
 				location.href = 'admin/plugins/coupon-wheel';
 		    }
@@ -119,10 +119,8 @@ class CouponWheelHandle {
 
 		data.action = 'AdminCouponWheelAjax::save';
 
-		$.post(ajax, data, function () {}, 'json').done(function (response) {
-			show_message(response.message, response.status)
-			if (response.status === 'success') {
-			}
+		request.post(ajax, data).then(function(response) {
+			SkilldoMessage.response(response);
 		});
 
 		return false;
@@ -143,7 +141,7 @@ class CouponWheelLogTableHandle {
 			action : 'AdminCouponWheelLogAjax::isRead'
 		}
 
-		$.post(ajax, data, function (data) {}, 'json').done(function (response) {});
+		request.post(ajax, data).then(function (response) {});
 	}
 	load(element) {
 
@@ -159,11 +157,11 @@ class CouponWheelLogTableHandle {
 
 		let self = this;
 
-		$.post(ajax, data, function (data) {}, 'json').done(function (response) {
+		request.post(ajax, data).then(function (response) {
 
 			$('.loading').hide();
 
-			if (response.status === 'error') show_message(response.message, response.status);
+			if (response.status === 'error') SkilldoMessage.error(response.message);
 
 			if (response.status === 'success') {
 
