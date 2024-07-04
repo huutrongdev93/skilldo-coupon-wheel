@@ -1,9 +1,13 @@
 <?php
-class CouponWheelMigration {
-    static function created(): void
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+
+return new class () extends Migration {
+
+    static function run(): void
     {
         if(!schema()->hasTable('wheels')) {
-            schema()->create('wheels', function ($table) {
+            schema()->create('wheels', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('name', 255)->collate('utf8mb4_unicode_ci')->nullable();
                 $table->char('seen_key', 6)->collate('utf8mb4_unicode_ci');
@@ -33,25 +37,25 @@ class CouponWheelMigration {
                 }
 
                 $table->string('status', 50)->collate('utf8mb4_unicode_ci')->default('run');
-                $table->dateTime('created');
+                $table->dateTime('created')->default('CURRENT_TIMESTAMP');
                 $table->dateTime('updated')->nullable();
                 $table->integer('order')->default(0);
             });
         }
         if(!schema()->hasTable('wheels_metadata')) {
-            schema()->create('wheels_metadata', function ($table) {
+            schema()->create('wheels_metadata', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('object_id')->default(0);
                 $table->string('meta_key', 255)->nullable();
                 $table->text('meta_value')->nullable();
                 $table->integer('order')->default(0);
-                $table->dateTime('created');
+                $table->dateTime('created')->default('CURRENT_TIMESTAMP');
                 $table->dateTime('updated')->nullable();
                 $table->index('object_id');
             });
         }
         if(!schema()->hasTable('wheels_log')) {
-            schema()->create('wheels_log', function ($table) {
+            schema()->create('wheels_log', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('wheel_id')->default(0);
                 $table->string('wheel_name', 255)->collate('utf8mb4_unicode_ci')->nullable();
@@ -71,7 +75,7 @@ class CouponWheelMigration {
                 $table->text('referer');
                 $table->integer('timestamp')->default(0);
                 $table->tinyInteger('is_read')->default(0);
-                $table->dateTime('created');
+                $table->dateTime('created')->default('CURRENT_TIMESTAMP');
                 $table->dateTime('updated')->nullable();
                 $table->integer('order')->default(0);
                 $table->integer('user_id')->default(0);
@@ -79,10 +83,10 @@ class CouponWheelMigration {
         }
     }
 
-    static function drop(): void
+    static function down(): void
     {
         schema()->drop('wheels');
         schema()->drop('wheels_metadata');
         schema()->drop('wheels_log');
     }
-}
+};

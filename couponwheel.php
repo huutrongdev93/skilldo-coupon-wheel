@@ -19,12 +19,12 @@ class CouponWheel {
     }
     public function active(): void
     {
-        CouponWheelMigration::created();
+        (include 'database/database.php')->up();
         CouponWheelRoles::active();
     }
     public function uninstall(): void
     {
-        CouponWheelMigration::drop();
+        (include 'database/database.php')->down();
     }
     public function assets(AssetPosition $header, AssetPosition $footer): void
     {
@@ -41,7 +41,6 @@ class CouponWheel {
     }
 }
 
-include_once 'includes/migration.php';
 include_once 'includes/roles.php';
 include_once 'includes/function.php';
 include_once 'ajax.php';
