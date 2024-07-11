@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Capsule\Manager as DB;
 
 return new class () extends Migration {
 
@@ -37,7 +38,7 @@ return new class () extends Migration {
                 }
 
                 $table->string('status', 50)->collate('utf8mb4_unicode_ci')->default('run');
-                $table->dateTime('created')->default('CURRENT_TIMESTAMP');
+                $table->dateTime('created')->default(DB::raw('CURRENT_TIMESTAMP'));
                 $table->dateTime('updated')->nullable();
                 $table->integer('order')->default(0);
             });
@@ -49,7 +50,7 @@ return new class () extends Migration {
                 $table->string('meta_key', 255)->nullable();
                 $table->text('meta_value')->nullable();
                 $table->integer('order')->default(0);
-                $table->dateTime('created')->default('CURRENT_TIMESTAMP');
+                $table->dateTime('created')->default(DB::raw('CURRENT_TIMESTAMP'));
                 $table->dateTime('updated')->nullable();
                 $table->index('object_id');
             });
@@ -75,7 +76,7 @@ return new class () extends Migration {
                 $table->text('referer');
                 $table->integer('timestamp')->default(0);
                 $table->tinyInteger('is_read')->default(0);
-                $table->dateTime('created')->default('CURRENT_TIMESTAMP');
+                $table->dateTime('created')->default(DB::raw('CURRENT_TIMESTAMP'));
                 $table->dateTime('updated')->nullable();
                 $table->integer('order')->default(0);
                 $table->integer('user_id')->default(0);
