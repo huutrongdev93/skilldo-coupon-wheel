@@ -1,12 +1,4 @@
 <?php
-/**
-Plugin name     : Vòng xoay may mắn
-Plugin class    : CouponWheel
-Plugin uri      : http://sikido.vn
-Description     : Tạo một vòng quay may mắn kích thích nhu cầu mua sắm của khách hàng.
-Author          : SKDSoftware Dev Team
-Version         : 2.1.0
-*/
 const CP_WHEEL_NAME = 'couponwheel';
 
 class CouponWheel {
@@ -37,7 +29,9 @@ class CouponWheel {
     }
     public function render(): void
     {
-        echo '<div id="couponWheelRoot" data-show="'. !Device::isGoogleSpeed() .'"></div>';
+        if(!Theme::isReviewWidget()) {
+            echo '<div id="couponWheelRoot" data-show="'. !Device::isGoogleSpeed() .'"></div>';
+        }
     }
 }
 
