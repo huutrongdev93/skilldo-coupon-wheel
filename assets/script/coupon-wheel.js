@@ -94,11 +94,11 @@ function CouponWheel(init_params)
 			$(this.wheel_dom+' .couponWheel_popup').animate({left: '0px'},500,'easeOutExpo');
 		}
 
-		$.post(ajax, {
+		request.post(ajax, {
 			action: 'CouponWheelAjax::event',
 			code: 'show_popup',
 			id: this.wheel_hash,
-		}, function () {}, 'json');
+		});
 
 	};
 
@@ -192,7 +192,7 @@ function CouponWheel(init_params)
 
 		let self = this;
 
-		$.post(ajax, formData, function () {}, 'json').done(function (response) {
+		request.post(ajax, formData).then(function (response) {
 			self.submit_form_done(response);
 		});
 	};
@@ -333,19 +333,14 @@ function couponWheel_manual_trigger(wheel_hash, embed)
 
 	if(typeof (window['couponWheel']) !== 'object')
 	{
-		$.ajax({
-			url: ajax,
-			method: 'POST',
-			data: {
-				action: 'CouponWheelAjax::renderPopup',
-			},
-			context: this,
-		}).done(function(html){
-
+		request.post(ajax, {
+			action: 'CouponWheelAjax::renderPopup',
+		})
+		.then(function(response) {
 			if (embed){
-				$('.couponWheel_embed_'+wheel_hash).html(html);
+				$('.couponWheel_embed_'+wheel_hash).html(response);
 			} else {
-				$('#couponWheelRoot').html(html);
+				$('#couponWheelRoot').html(response);
 			}
 
 			if(window['couponWheel'] !== undefined)
@@ -354,7 +349,7 @@ function couponWheel_manual_trigger(wheel_hash, embed)
 			} else {
 				console.log('Coupon Wheel with hash '+wheel_hash+' does not exist or is not LIVE');
 			}
-		});
+		})
 	}
 	else {
 		window['couponWheel'].show_popup(0);
@@ -363,9 +358,13 @@ function couponWheel_manual_trigger(wheel_hash, embed)
 
 window.addEventListener('load',function(){
 	if($('#couponWheelRoot').data('show') == true) {
-		$.post(ajax, {action: 'CouponWheelAjax::renderPopup'}, function () {
-		}, 'html').done(function (response) {
+
+		request.post(ajax, {
+			action: 'CouponWheelAjax::renderPopup',
+		})
+		.then(function (response) {
 			$('#couponWheelRoot').html(response);
 		});
+
 	}
 });

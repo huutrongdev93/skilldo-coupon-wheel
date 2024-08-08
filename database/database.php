@@ -5,7 +5,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 return new class () extends Migration {
 
-    static function run(): void
+    static function up(): void
     {
         if(!schema()->hasTable('wheels')) {
             schema()->create('wheels', function (Blueprint $table) {
