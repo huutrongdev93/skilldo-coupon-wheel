@@ -22,16 +22,14 @@
     <td class="column text-right" style="width: 300px;">
         @if($item->status != 'run')
 	        @if (Auth::hasCap('couponWheelDelete'))
-                {!! Admin::btnConfirm([
+                {!! Admin::btnConfirm('red', [
                     'id' => $item->id,
-                    'btn' => 'red',
                     'label' => trans('general.delete'),
                     'class' => ['btn-red-bg p-1 ps-2 pe-2'],
-                    'trash' => 'disable',
                     'action' => 'delete',
-                    'ajax' => 'AdminCouponWheelAjax::delete',
-                    'module' => 'wheels',
-                    'des' => 'Bạn chắc chắn muốn xóa chương trình '.$item->name.' này?'
+                    'ajax'  => 'AdminCouponWheelAjax::delete',
+                    'model' => 'wheels',
+                    'description'   => 'Bạn chắc chắn muốn xóa chương trình '.$item->name.' này?'
                 ]) !!}
             @endif
             @if (Auth::hasCap('couponWheelEdit'))

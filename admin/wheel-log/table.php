@@ -50,15 +50,14 @@ class AdminWheelLogTable extends SKDObjectTable {
 
         if (Auth::hasCap('couponWheelLogDelete')) {
 
-            $listButton[] = Admin::btnConfirm([
+            $listButton[] = Admin::btnConfirm('red', [
                 'id' => $item->id,
-                'btn' => 'red btn-red-bg p-1 ps-2 pe-2',
+                'class' => 'btn-red-bg p-1 ps-2 pe-2',
                 'icon' => Admin::icon('delete'),
-                'trash' => 'disable',
                 'action' => 'delete',
                 'ajax' => 'AdminCouponWheelLogAjax::delete',
-                'module' => 'wheels_log',
-                'des' => 'Bạn chắc chắn muốn xóa lượt chơi này?'
+                'model' => 'wheels_log',
+                'description' => 'Bạn chắc chắn muốn xóa lượt chơi này?'
             ]);
         }
 
