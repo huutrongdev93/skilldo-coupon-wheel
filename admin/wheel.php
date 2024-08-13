@@ -15,10 +15,10 @@ Class AdminCouponWheel {
             AdminMenu::addSub('marketing', 'coupon-wheel', trans('admin.wheel.menu'), 'plugins/coupon-wheel', ['callback' => 'AdminCouponWheel::page']);
         }
         if(Auth::hasCap('couponWheelLogList')) {
-            $count = CacheHandler::get('coupon_wheel_log_is_read');
+            $count = \SkillDo\Cache::get('coupon_wheel_log_is_read');
             if(empty($count)) {
                 $count = WheelLog::count(Qr::set('is_read', 0));
-                CacheHandler::save('coupon_wheel_log_is_read', $count);
+                \SkillDo\Cache::save('coupon_wheel_log_is_read', $count);
             }
             AdminMenu::addSub('marketing', 'coupon-wheel-log', trans('admin.wheel.log.menu'), 'plugins/coupon-wheel-log', [
                 'callback' => 'AdminCouponWheelLog::page',

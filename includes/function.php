@@ -333,7 +333,7 @@ class WheelHelper {
             $cacheId .= '_'.md5($userData);
         }
 
-        $html = CacheHandler::get($cacheId);
+        $html = \SkillDo\Cache::get($cacheId);
 
         if(empty($html)) {
 
@@ -357,7 +357,7 @@ class WheelHelper {
                 'currentUser'   => $currentUser,
             ]);
 
-            CacheHandler::save($cacheId, $html);
+            \SkillDo\Cache::save($cacheId, $html);
         }
 
         echo $html;

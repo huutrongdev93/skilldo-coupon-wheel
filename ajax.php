@@ -472,9 +472,9 @@ class AdminCouponWheelAjax {
 
             if(!is_skd_error($id)) {
 
-                CacheHandler::delete('coupon_wheel_popup_'.md5($object->id));
+                \SkillDo\Cache::delete('coupon_wheel_popup_'.md5($object->id));
 
-                CacheHandler::delete('coupon_wheel_popup_run');
+                \SkillDo\Cache::delete('coupon_wheel_popup_run');
 
                 Wheel::updateMeta($id, 'displayTemplate', $wheelTemplate);
 
@@ -520,9 +520,9 @@ class AdminCouponWheelAjax {
 
             if(!is_skd_error($id)) {
 
-                CacheHandler::delete('coupon_wheel_popup_'.md5($wheel->id));
+                \SkillDo\Cache::delete('coupon_wheel_popup_'.md5($wheel->id));
 
-                CacheHandler::delete('coupon_wheel_popup_run');
+                \SkillDo\Cache::delete('coupon_wheel_popup_run');
 
                 response()->success(trans('ajax.save.success'));
             }
@@ -546,9 +546,9 @@ class AdminCouponWheelAjax {
 
             if(Wheel::delete($id)) {
 
-                CacheHandler::delete('coupon_wheel_popup_'.md5($id));
+                \SkillDo\Cache::delete('coupon_wheel_popup_'.md5($id));
 
-                CacheHandler::delete('coupon_wheel_popup_run');
+                \SkillDo\Cache::delete('coupon_wheel_popup_run');
 
                 response()->success(trans('ajax.delete.success'));
             }
@@ -569,11 +569,11 @@ class CouponWheelAjax {
     {
         $cacheId = 'coupon_wheel_popup_run';
 
-        $wheel = CacheHandler::get($cacheId);
+        $wheel = \SkillDo\Cache::get($cacheId);
 
         if(empty($wheel)) {
             $wheel = Wheel::get(Qr::set('status', 'run'));
-            CacheHandler::save($cacheId, $wheel);
+            \SkillDo\Cache::save($cacheId, $wheel);
         }
 
         if(!have_posts($wheel)) {
@@ -730,7 +730,7 @@ class CouponWheelAjax {
                 response()->error($wheel_run_id);
             }
 
-            CacheHandler::delete('coupon_wheel_log_is_read');
+            \SkillDo\Cache::delete('coupon_wheel_log_is_read');
 
             model('wheels')->increment('popup_spin');
 
@@ -886,7 +886,7 @@ class AdminCouponWheelLogAjax {
 
             WheelLog::where('is_read', 0)->update(['is_read' => 1]);
 
-            CacheHandler::delete('coupon_wheel_log_is_read');
+            \SkillDo\Cache::delete('coupon_wheel_log_is_read');
 
             response()->success(trans('ajax.update.success'));
         }
