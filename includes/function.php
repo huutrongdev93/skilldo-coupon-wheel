@@ -1,9 +1,9 @@
 <?php
 class Wheel extends SkillDo\Model\Model {
 
-    static string $table = 'wheels';
+    protected string $table = 'wheels';
 
-    static array $columns = [
+    protected array $columns = [
         'name'                  => ['string'],
         'seen_key'              => ['string'],
         'is_live'               => ['int', 0],
@@ -25,36 +25,35 @@ class Wheel extends SkillDo\Model\Model {
         'status'                => ['string', 'run'],
     ];
 
-    static array $rules = [
-        'created'   => true,
-        'updated'   => true,
-    ];
-
-    static function insert($insertData = [], object|null $oldObject = null): int|SKD_Error
+    protected static function boot(): void
     {
-        foreach (range(1,12) as $i) {
-            static::$columns['slice'.$i.'_label'] = ['string'];
-            static::$columns['slice'.$i.'_value'] = ['string'];
-            static::$columns['slice'.$i.'_qty'] = ['int', 0];
-            static::$columns['slice'.$i.'_infinite'] = ['int', 0];
-            static::$columns['slice'.$i.'_percent'] = ['int', 12];
-        }
+        parent::boot();
 
-        if (empty($insertData['id'])) {
-            if(empty($insertData['seen_key'])) {
-                $insertData['seen_key'] = substr(md5(uniqid('',true)).'seen_key',0,6);
+        static::columnsCreated(function (Wheel $wheel) {
+            foreach (range(1,12) as $i) {
+                $wheel->setColumn('slice'.$i.'_label', ['string']);
+                $wheel->setColumn('slice'.$i.'_value', ['string']);
+                $wheel->setColumn('slice'.$i.'_qty', ['int', 0]);
+                $wheel->setColumn('slice'.$i.'_infinite', ['int', 0]);
+                $wheel->setColumn('slice'.$i.'_percent', ['int', 12]);
             }
-        }
+        });
 
-        return parent::insert($insertData, $oldObject);
+        static::saving(function (Wheel $wheel) {
+            if (empty($wheel->id)) {
+                if(empty($wheel->seen_key)) {
+                    $wheel->seen_key = substr(md5(uniqid('',true)).'seen_key',0,6);
+                }
+            }
+        });
     }
 }
 
 class WheelLog extends SkillDo\Model\Model {
 
-    static string $table = 'wheels_log';
+    protected string $table = 'wheels_log';
 
-    static array $columns = [
+    protected array $columns = [
         'wheel_id'          => ['int', 0],
         'wheel_name'        => ['string'],
         'wheel_deg_end'     => ['string'],
@@ -74,11 +73,6 @@ class WheelLog extends SkillDo\Model\Model {
         'timestamp'         => ['int', 0],
         'is_read'           => ['int', 0],
         'user_id'           => ['int', 0],
-    ];
-
-    static array $rules = [
-        'created'   => true,
-        'updated'   => true,
     ];
 }
 
