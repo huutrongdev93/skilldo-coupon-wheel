@@ -1,0 +1,18 @@
+{
+    "name": "Marketing - Coupon Wheel",
+    "class": "CouponWheel",
+    "url": "https://sikido.vn",
+    "description": "Vòng quay may mắn tặng mã giảm giá hoặc sản phẩm cho khách hàng.",
+    "author": "SKDSoftware Dev Team",
+    "version": "3.0.1",
+    "thumb": "assets/images/thumb.png",
+    "autoload": {
+        "alias": "CouponWheel",
+        "psr-4": {
+            "CouponWheel\\Enum": "app\\Enum",
+            "CouponWheel\\Supports": "app\\Supports",
+            "CouponWheel\\Notifications": "app\\Notifications"
+        }
+    }
+}
+

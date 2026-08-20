@@ -1,0 +1,93 @@
+/* =============================================
+   CouponWheel Admin CSS
+   ============================================= */
+/* Sticky box-header cho box Ô vòng quay */
+.cw-slices-box {
+  position: relative;
+}
+.cw-slices-box > .box-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  border-bottom: 1px solid #e3e6f0;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+/* Slice card */
+.cw-slice-row .card-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e3e6f0;
+  user-select: none;
+}
+.cw-slice-row .card-body {
+  background: #fff;
+}
+.cw-slice-row .cw-prob-badge {
+  font-size: 11px;
+  padding: 3px 7px;
+  transition: background 0.3s;
+}
+/* Probability preview */
+#cw-prob-list .cw-prob-item .progress {
+  border-radius: 3px;
+  background: #e9ecef;
+}
+#cw-prob-list .cw-prob-item span {
+  font-size: 12px;
+  color: #555;
+}
+/* Product modal results */
+.cw-product-item {
+  font-size: 13px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cw-product-item:hover {
+  background: #f0f4ff;
+}
+/* Page header actions */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e3e6f0;
+}
+.page-header-right {
+  display: flex;
+  gap: 8px;
+}
+/* Slices container empty state */
+#cw-slices-container:empty::after {
+  content: 'Chưa có ô nào. Nhấn "+ Thêm ô" để bắt đầu.';
+  display: block;
+  text-align: center;
+  color: #aaa;
+  padding: 20px 0;
+  font-size: 13px;
+}
+.cw-program-form-display .display-items-img .item-img {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 2px;
+}
+.cw-program-form-display .display-items-img .item-img span {
+  border-radius: 8px;
+  display: block;
+  padding: 20px;
+  cursor: pointer;
+  background-size: cover!important;
+}
+.cw-program-form-display .display-items-img .item-img input {
+  display: none;
+}
+.cw-program-form-display .display-items-img .item-img.active {
+  border-color: #000;
+}
+/*# sourceMappingURL=admin.css.map */
