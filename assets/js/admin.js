@@ -387,7 +387,7 @@
             request.post(window.CWData.ajaxUrl, payload).then(res => {
                 loading.stop();
                 SkilldoMessage.response(res);
-                if (res.data.status === 'success') {
+                if (res.status === 'success') {
                     setTimeout(() => {
                         window.location.href = window.CWData.backUrl;
                     }, 800);

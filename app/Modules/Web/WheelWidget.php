@@ -10,6 +10,9 @@ class WheelWidget
 {
     public static function render(): void
     {
+        // Khung xem trước của Page Builder (review/*) không cần vòng quay
+        if (str_starts_with(trim((string) request()->path(), '/'), 'review/')) return;
+
         $now = date('Y-m-d H:i:s');
 
         $program = WheelProgram::where('status', 1)

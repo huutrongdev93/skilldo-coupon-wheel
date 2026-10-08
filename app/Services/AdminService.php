@@ -26,6 +26,11 @@ class AdminService
             ['label' => trans('coupon-wheel::admin.title'), 'url' => route('admin.coupon_wheel.index')],
             ['label' => trans('admin::general.update')]
         ]);
+
+        app('breadcrumb.admin')->add('admin.coupon_wheel.logs', [
+            ['label' => trans('coupon-wheel::admin.title'), 'url' => route('admin.coupon_wheel.index')],
+            ['label' => trans('coupon-wheel::admin.log.page_title')]
+        ]);
     }
 
     public static function system($tabs)

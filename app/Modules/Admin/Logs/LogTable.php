@@ -107,6 +107,18 @@ class LogTable extends SKDObjectTable
             $query->where('program_id', $programId);
         }
 
+        $keyword = trim((string) $request->input('keyword'));
+
+        if ($keyword !== '')
+        {
+            $query->where(function (Builder $sub) use ($keyword) {
+                $sub->where('prize_name', 'like', '%' . $keyword . '%')
+                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                    ->orWhere('phone', 'like', '%' . $keyword . '%')
+                    ->orWhere('ip', 'like', '%' . $keyword . '%');
+            });
+        }
+
         return $query;
     }
 

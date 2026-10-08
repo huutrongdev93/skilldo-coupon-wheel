@@ -4,7 +4,7 @@
     "url": "https://sikido.vn",
     "description": "Vòng quay may mắn tặng mã giảm giá hoặc sản phẩm cho khách hàng.",
     "author": "SKDSoftware Dev Team",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "thumb": "assets/images/thumb.png",
     "autoload": {
         "alias": "CouponWheel",
